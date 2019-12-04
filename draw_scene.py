@@ -5,7 +5,6 @@ import matplotlib.cm
 import numpy as np
 
 import fresnel
-import fresnel.interact
 import freud
 import mbuild as mb
 import PIL

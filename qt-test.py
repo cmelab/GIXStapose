@@ -1,16 +1,11 @@
-import fresnel
-import fresnel.interact
-import mbuild as mb
+from PySide2 import QtCore, QtGui, QtWidgets
 
-from draw_scene import Methane, visualize
-
-# build Scene
-methane = Methane()
-methane.box = mb.Box(lengths=[0.5,0.5,0.5])
-
-scene = visualize(methane, show_box=True)
+from diffract import Diffract
 
 
-view = fresnel.interact.SceneView(scene)
-view.show()
-fresnel.interact.app.exec_()
+app = QtWidgets.QApplication([])
+
+diffract = Diffract()
+diffract.show()
+
+app.exec_()

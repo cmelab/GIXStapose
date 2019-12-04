@@ -7,15 +7,6 @@ Interactive Qt widgets.
 
 import sys
 
-# workaround bug in ipython that prevents pyside2 importing
-# https://github.com/jupyter/qtconsole/pull/280
-try:
-    import IPython.external.qt_loaders
-    if type(sys.meta_path[0]) == IPython.external.qt_loaders.ImportDenier:
-        del sys.meta_path[0]
-except:
-    pass
-
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 from PySide2 import QtCore
@@ -23,15 +14,7 @@ import numpy
 import time
 import collections
 import math
-
-from . import tracer, camera
-
-# initialize QApplication
-# but not in sphinx
-if 'sphinx' not in sys.modules:
-    app = QtCore.QCoreApplication.instance();
-    if app is None:
-        app = QtWidgets.QApplication(['fresnel'])
+from fresnel import tracer, camera
 
 def q_mult(q1, q2):
     w1, x1, y1, z1 = q1
