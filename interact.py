@@ -10,6 +10,7 @@ import sys
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 from PySide2 import QtCore
+from PySide2.QtCore import Signal, QObject
 import numpy
 import time
 import collections
@@ -158,8 +159,6 @@ class SceneView(QtWidgets.QWidget):
     """
     def __init__(self, scene, max_samples=2000):
         super().__init__()
-        self.setWindowTitle("fresnel: scene viewer")
-
         self.setMinimumSize(10,10)
 
         self.max_samples = max_samples;
@@ -188,6 +187,9 @@ class SceneView(QtWidgets.QWidget):
         self.mouse_initial_pos = None;
 
         self.camera_controller = CameraController3D(self.scene.camera)
+
+        # Connect moving the camera
+        self.c = Communicate()
 
     def _repr_html_(self):
         self.show();
@@ -256,6 +258,9 @@ class SceneView(QtWidgets.QWidget):
         self.rendering = False;
 
     def start_rendering(self):
+        # emit the signal to update the camera
+        self.c.update_camera.emit()
+
         self.rendering = True;
         self.samples = 0;
         self.tracer.reset()
@@ -308,3 +313,6 @@ class SceneView(QtWidgets.QWidget):
                                     slight=event.modifiers() & QtCore.Qt.ControlModifier)
         self.start_rendering()
         event.accept()
+
+class Communicate(QtWidgets.QWidget):
+    update_camera = Signal()
