@@ -33,7 +33,7 @@ class ApplicationWindow(QtWidgets.QWidget):
         self._view = interact.SceneView(scene)
         layout.addWidget(self._view)
 
-        #self._view.c.update_camera.connect(self._update_camera)
+        self._view.c.update_camera.connect(self._update_camera)
 
         #dynamic_canvas = FigureCanvas(Figure(figsize=(5, 3)))
         #layout.addWidget(dynamic_canvas)
@@ -61,11 +61,11 @@ class ApplicationWindow(QtWidgets.QWidget):
     #    self._dynamic_ax.plot(val, np.sin(val),"ro")
     #    self._dynamic_ax.figure.canvas.draw()
 
-    def _update_camera(self):
+    def _update_camera(self, value):
         self._label.clear()
         val = self._view.scene.camera
         # display the camera value
-        self._label.setText(str(val))
+        self._label.setText(str(value))
 
 
 if __name__ == "__main__":
