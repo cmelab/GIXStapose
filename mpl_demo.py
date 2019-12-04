@@ -39,6 +39,11 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self._dynamic_ax.plot(t, np.sin(t))
         self._dial.valueChanged.connect(self._update_canvas)
 
+        self._label = QtWidgets.QLabel()
+        self._label.setText("hello")
+        layout.addWidget(self._label)
+        self._dial.valueChanged.connect(self._update_text)
+
     def _update_canvas(self):
         self._dynamic_ax.clear()
         val = self._dial.value()
@@ -47,6 +52,12 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self._dynamic_ax.plot(t, np.sin(t))
         self._dynamic_ax.plot(val, np.sin(val),"ro")
         self._dynamic_ax.figure.canvas.draw()
+
+    def _update_text(self):
+        self._label.clear()
+        val = self._dial.value()
+        # display the dial value
+        self._label.setText(str(val))
 
 
 if __name__ == "__main__":
