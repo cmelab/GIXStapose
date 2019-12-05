@@ -63,7 +63,6 @@ class ApplicationWindow(QtWidgets.QWidget):
 
     def _update_camera(self, value):
         self._label.clear()
-        val = self._view.scene.camera
         # display the camera value
         self._label.setText(str(value))
 
