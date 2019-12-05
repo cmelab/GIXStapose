@@ -84,19 +84,23 @@ class diffractometer:
         else:
             self.dirname = os.getcwd()
 
-    def load(self, x, L):
+    def load(self, xyz, L):
         """
-
+        Loads the particle positions and box dimensions for diffraction.
+        Note: only supports orthorhombic boxes
 
         Parameters
         ----------
-
-        Returns
-        -------
+        xyz : np.ndarray (N,3), positions of each particle
+        L : iterable object, lengths of box vectors
         """
-        self.box = arr([[L[0], 0.0, 0.0], [0.0, L[1], 0.0], [0.0, 0.0, L[2]]])
-        self.orig = np.copy(x)
-        self.orig, self.image = pbc.shift_pbc(x, arr([L[0], L[1], L[2]]))
+        self.box = arr(
+                [[L[0], 0.0, 0.0],
+                 [0.0, L[1], 0.0],
+                 [0.0, 0.0, L[2]]]
+                )
+        self.orig = np.copy(xyz)
+        self.orig, self.image = pbc.shift_pbc(xyz, arr([L[0], L[1], L[2]]))
 
     def prep_matrices(self):
         """
@@ -355,6 +359,7 @@ class diffractometer:
         """
         print("Diffracting", len(self.orig), "particles")
         t = time.time()
+        # Enumerate through the rotation matrices
         for self.i, r in enumerate(self.r):
             print("{}/{}".format(self.i + 1, len(self.r)))
             dp = self.diffract(r.T)
