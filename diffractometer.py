@@ -12,9 +12,8 @@ class Diffractometer:
     def __init__(
         self,
         grid_size=512,
-        zoom=1,
+        zoom=4,
         peak_width=1,
-        n_views=20,
         length_scale=3.905,
         bot=4e-6,
         top=0.7
@@ -27,20 +26,17 @@ class Diffractometer:
         grid_size : int, size of the diffraction grid (default 512)
         zoom : (default 1)
         peak_width : (default 1)
-        n_views : (default 20)
         length_scale : (default 3.905)
         bot : (default 4e-6)
         top : (default 0.7)
         """
         self.N = grid_size
-        self.n_v = n_views + 3
         self.zoom = zoom
         self.peak_width = peak_width
         self.bin_w = 2.0
         self.length_scale = length_scale
         self.bot = bot
         self.top = top
-        self.i = 0
 
     def load(self, xyz, L):
         """
