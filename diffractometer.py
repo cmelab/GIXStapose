@@ -56,6 +56,7 @@ class Diffractometer:
         self.orig = np.copy(xyz)
         self.orig, self.image = pbc.shift_pbc(xyz, np.array([L[0], L[1], L[2]]))
 
+
     def pbc_2d(self, xy, N):
         """
         Reasonably fast periodic boundary conditions in two dimensions.
@@ -137,6 +138,31 @@ class Diffractometer:
         self.Ly = np.linalg.norm(shear[:, 1])
         inv_shear = np.linalg.inv(shear)
         return inv_shear
+
+    def circle_cutout(self, p):
+        """
+        Find pixels indices in diffraction intensity array outside of the circle
+        Note: taken from Diffractometer.prep_sq()
+
+        Parameters
+        ----------
+        p : numpy.ndarray (N,N), diffraction intensity array
+
+        Returns
+        -------
+        numpy.ndarray (N,), indices of particles outside the circle
+        note: N != to N in p.shape
+        """
+        y, x = np.indices(p.shape)
+        rmax = len(x) / 2 - 1
+        center = np.array([rmax, rmax])
+        # radii, constant for a single zoom
+        r = np.hypot(x - center[1], y - center[0]).flatten()
+        # array index into p corresponding to r
+        i = np.argsort(r.flat)
+        # sorted radius indices
+        r_sort = r.flat[i]
+        return i[r_sort > rmax]
 
     def scale(self, a):
         """
