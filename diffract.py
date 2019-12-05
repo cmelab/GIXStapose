@@ -63,7 +63,7 @@ def main():
     def load_xml(top_file):
         class xmlHolder:
             """
-            Class to transform and hold the xml data in 
+            Class to transform and hold the xml data in
             the same shape as the dcd trajectory information.
             """
 
@@ -129,7 +129,7 @@ def main():
         dcd_write_time=1e6,
     ):
         """
-        Generates an array with the desired 
+        Generates an array with the desired
         frames to diffract.
             Requires: None
             Returns: Array
@@ -183,7 +183,7 @@ def main():
                 dirname - str or None for directory name,
                     will default to 'diffract'.
             Returns: string -- directory name
-        If given -1 and no custom name, 
+        If given -1 and no custom name,
         it uses ``diffract'' as the default name.
         Otherwise it will use diffract-{frame} or
         {customname}-{frame} as the name.
@@ -218,15 +218,15 @@ def main():
 
     def filter_gsd(snapshot, exclude_atom_name=False, include_atom_name=False):
         """
-        Filters the gsd snapshot to obtain only the atom types or 
+        Filters the gsd snapshot to obtain only the atom types or
         indices desired.
         Requires:
             snapshot - GSD snapshot
         Returns:
-            xyz - array of xyz coordinates only for the desired 
+            xyz - array of xyz coordinates only for the desired
                 particles.
-        NOTE: Supports either: 
-            atom type exclusions or inclusions, 
+        NOTE: Supports either:
+            atom type exclusions or inclusions,
             atom_typing or inclusion of atom_ids (not exclusion of id)
         """
         xyz = snapshot.particles.position
@@ -247,7 +247,7 @@ def main():
 
     def iterate_through_desired_frames(t, frames, dirname, filetype):
         """
-        Function calls the diffract for each frame number 
+        Function calls the diffract for each frame number
         given in the array of frames.
         Requires:
             t - trajectory object
