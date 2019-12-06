@@ -14,14 +14,19 @@ from matplotlib.figure import Figure
 import fresnel
 import mbuild as mb
 
+from diffractometer import Diffractometer
 import interact
-from draw_scene import Methane, visualize
+from draw_scene import visualize #Methane
 
 # Build example scene
-methane = Methane()
-methane.box = mb.Box(lengths=[0.5, 0.5, 0.5])
+pdbname = "sc10"
+dirname = "gixs_data"
 
-scene = visualize(methane, show_box=True)
+box = mb.Box(np.array([10,10,10])/10)
+pdb = mb.load(f"{dirname}/{pdbname}.pdb")
+pdb.box = box
+
+scene = visualize(pdb, show_box=True)
 
 class ApplicationWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -89,6 +94,10 @@ class ApplicationWindow(QtWidgets.QWidget):
         self._label.clear()
         # display the camera value
         self._label.setText(value.__repr__())
+
+    def diffract(rot=None):
+        pass
+
 
 
 if __name__ == "__main__":
