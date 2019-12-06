@@ -119,10 +119,10 @@ def visualize(comp, color="cpk", scale=1.0, show_box=False):
     N = comp.n_particles
     particle_names = [p.name for p in comp.particles()]
 
-    # all_bonds.shape is (nbond, 2 ends, xyz)
-    all_bonds = np.stack([np.stack((i[0].pos, i[1].pos)) for i in comp.bonds()])
-
-    N_bonds = all_bonds.shape[0]
+    N_bonds = comp.n_bonds
+    if N_bonds > 0:
+        # all_bonds.shape is (nbond, 2 ends, xyz)
+        all_bonds = np.stack([np.stack((i[0].pos, i[1].pos)) for i in comp.bonds()])
 
     color_array = np.empty((N, 3), dtype="float64")
     if color == "cpk":
@@ -180,20 +180,21 @@ def visualize(comp, color="cpk", scale=1.0, show_box=False):
     geometry.radius[:] = rad_array
 
     # bonds
-    bonds = fresnel.geometry.Cylinder(scene, N=N_bonds)
-    bonds.material = fresnel.material.Material(roughness=0.5)
-    bonds.outline_width = 0.01 * scale
+    if N_bonds > 0:
+        bonds = fresnel.geometry.Cylinder(scene, N=N_bonds)
+        bonds.material = fresnel.material.Material(roughness=0.5)
+        bonds.outline_width = 0.01 * scale
 
-    # bonds are white
-    bond_colors = np.ones((N_bonds, 3), dtype="float64")
+        # bonds are white
+        bond_colors = np.ones((N_bonds, 3), dtype="float64")
 
-    bonds.material.primitive_color_mix = 1.0
-    bonds.points[:] = all_bonds
+        bonds.material.primitive_color_mix = 1.0
+        bonds.points[:] = all_bonds
 
-    bonds.color[:] = np.stack(
-        [fresnel.color.linear(bond_colors), fresnel.color.linear(bond_colors)], axis=1
-    )
-    bonds.radius[:] = [0.03 * scale] * N_bonds
+        bonds.color[:] = np.stack(
+            [fresnel.color.linear(bond_colors), fresnel.color.linear(bond_colors)], axis=1
+        )
+        bonds.radius[:] = [0.03 * scale] * N_bonds
 
     if show_box:
         # Use comp.box, unless it does not exist, then use comp.boundingbox
