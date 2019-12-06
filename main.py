@@ -43,7 +43,7 @@ class ApplicationWindow(QtWidgets.QWidget):
         windowlayout.addWidget(self.horizontalGroupBox)
 
         self._label = QtWidgets.QLabel()
-        self._label.setText(self._view.scene.camera.__repr__())
+        self._label.setText(self.getCameraText(self._view.scene.camera))
         windowlayout.addWidget(self._label)
 
         self.setLayout(windowlayout)
@@ -62,6 +62,20 @@ class ApplicationWindow(QtWidgets.QWidget):
         #self._dial.valueChanged.connect(self._update_canvas)
 
         #self._dial.valueChanged.connect(self._update_text)
+
+    def getCameraText(self, camera):
+        pos = camera.position
+        look = camera.look_at
+        text =  "".join([
+            "Camera\n",
+            "   position : {0:.3f} {1:.3f} {2:.3f}\n".format(pos[0], pos[1], pos[2]),
+            "   look at :  {0:.3f} {1:.3f} {2:.3f}\n".format(look[0], look[1], look[2]),
+            "   up :       {0:.3f} {1:.3f} {2:.3f}\n".format(
+                camera.up[0], camera.up[1], camera.up[2]
+                ),
+            "   height :   {0:.3f}".format(camera.height)
+            ])
+        return text
 
     def createGridLayout(self):
         self.horizontalGroupBox = QtWidgets.QGroupBox()
@@ -93,9 +107,9 @@ class ApplicationWindow(QtWidgets.QWidget):
     def _update_camera(self, value):
         self._label.clear()
         # display the camera value
-        self._label.setText(value.__repr__())
+        self._label.setText(self.getCameraText(value))
 
-    def diffract(rot=None):
+    def diffract(self, rot=None):
         pass
 
 
