@@ -251,3 +251,109 @@ class Diffractometer:
         dp[dp < self.bot] = self.bot
         dp[dp > self.top] = self.top
         return np.log10(dp)
+
+
+def vector_projection(u, v):
+    """
+    Projection of u onto v
+
+    Parameters
+    ----------
+    u,v : numpy.ndarray (3,), vectors
+
+    Returns
+    -------
+    numpy.ndarray (3,), projection of u onto v
+    """
+    return v * np.dot(u, v)/np.linalg.norm(v)
+
+def unit_vector(vector):
+    """
+    Returns the unit vector of the vector.
+    """
+    return vector / np.linalg.norm(vector)
+
+def get_angle(u, v):
+    """
+    Find angle between u and v
+
+    Parameters
+    ----------
+    u,v : numpy.ndarray (3,), vectors
+
+    Returns
+    -------
+    float, angle between u and v in radians
+    """
+    u = unit_vector(u)
+    v = unit_vector(v)
+    angle = np.arccos(np.clip(np.dot(u,v), -1.0, 1.0))
+    if angle != angle:
+        # Catches nan values
+        return 0.0
+    return angle
+
+def camera_to_rot(camera):
+    """
+    Given a fresnel camera object, compute the rotation matrix
+
+    Parameters
+    ----------
+    camera : fresnel.camera, camera in fresnel scene
+
+    Returns
+    -------
+    numpy.ndarray (3,3), rotation matrix
+    """
+    pos = scene.camera.position
+    look_at = scene.camera.look_at
+
+    cam_vec = np.array(pos)-np.array(look_at)
+
+    # axis vectors
+    xvec = np.array([1,0,0])
+    yvec = np.array([0,1,0])
+    zvec = np.array([0,0,1])
+
+    # Project the camera vector into the xy, yz, and xz planes
+    # by subtracting the projection of the plane normal vector
+    cam_xy = cam_vec - vector_projection(cam_vec, zvec)
+    cam_yz = cam_vec - vector_projection(cam_vec, xvec)
+    cam_xz = cam_vec - vector_projection(cam_vec, yvec)
+
+    # find the angles betwen the camera vector projections and the axes vectors
+    # alpha is in the yz, beta xz, gamma xy
+    alpha = get_angle(cam_yz, yvec)
+    beta = get_angle(cam_xz, zvec)
+    gamma = get_angle(cam_xy, xvec)
+
+    return rot_mat(alpha, beta, gamma)
+
+def rot_mat(alpha, beta, gamma):
+    """
+    Given angles alpha, beta, and gamma, compute the rotation matrix
+
+    Parameters
+    ----------
+    alpha, beta, gamma : float, angles about the x, y, and z axes in radians
+
+    Returns
+    -------
+    numpy.ndarray (3,3), rotation matrix
+    """
+    Rx = np.array([
+        [1, 0, 0],
+        [0, np.cos(alpha), -np.sin(alpha)],
+        [0, np.sin(alpha), np.cos(alpha)]
+    ])
+    Ry = np.array([
+        [np.cos(beta), 0, np.sin(beta)],
+        [0, 1, 0],
+        [-np.sin(beta), 0, np.cos(beta)]
+    ])
+    Rz = np.array([
+        [np.cos(gamma), -np.sin(gamma), 0],
+        [np.sin(gamma), np.cos(gamma), 0],
+        [0, 0, 1]
+    ])
+    return np.dot(np.dot(Rx,Ry),Rz)
