@@ -305,8 +305,8 @@ def camera_to_rot(camera):
     -------
     numpy.ndarray (3,3), rotation matrix
     """
-    pos = scene.camera.position
-    look_at = scene.camera.look_at
+    pos = camera.position
+    look_at = camera.look_at
 
     cam_vec = np.array(pos)-np.array(look_at)
 
