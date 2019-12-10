@@ -22,4 +22,9 @@ To run:
 ```
 python main.py
 ```
-currently this will run a hard-coded simple-cubic example, but the next step is to accept input files.
+to run a simple-cubic example or
+```
+python main.py -i INPUTFILE
+```
+to load an input file format supported by [MDTraj](http://mdtraj.org/1.8.0/load_functions.html) or a [gsd file](https://gsd.readthedocs.io/en/stable/).
+
