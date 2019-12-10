@@ -2,6 +2,8 @@
 An interactive structure viewer alongside its simulated diffraction pattern
 This code uses [fresnel](https://fresnel.readthedocs.io/en/stable/), [mbuild](https://mosdef.org/mbuild/index.html), and [cme_utils/diffractometer](https://bitbucket.org/cmelab/cme_utils/src/master/cme_utils/analyze/diffractometer.py)
 
+![A screen capture of diffract in action](screenshot.gif)
+
 To install:
 1. Create environment and install necessary packages
 ```
@@ -15,3 +17,9 @@ git clone git@bitbucket.org:cmelab/cme_utils.git
 cd cme_utils
 pip install -e .
 ```
+
+To run:
+```
+python main.py
+```
+currently this will run a hard-coded simple-cubic example, but the next step is to accept input files.
