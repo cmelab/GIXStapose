@@ -220,13 +220,14 @@ class Diffractometer:
         img = ndimage.interpolation.affine_transform(img, A4, A5, mode="constant")
         return img
 
-    def diffract(self, rot):
+    def diffract(self, rot, cutout=True):
         """
         2D FFT to get diffraction pattern from intensity matrix.
 
         Parameters
         ----------
         rot : numpy.ndarray (3, 3), rotation matrix
+        cutout : bool, return diffraction pattern with circle cutout (default True)
 
         Returns
         -------
@@ -250,7 +251,13 @@ class Diffractometer:
         dp /= dp.max()
         dp[dp < self.bot] = self.bot
         dp[dp > self.top] = self.top
-        return np.log10(dp)
+        dp = np.log10(dp)
+        if not cutout:
+            return dp
+
+        idbig = self.circle_cutout(dp)
+        dp[np.unravel_index(idbig, (self.N, self.N))] = np.log10(self.bot)
+        return dp
 
 
 def vector_projection(u, v):
