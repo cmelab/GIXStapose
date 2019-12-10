@@ -1,15 +1,13 @@
 # diffract
-interactive structure viewer with diffraction
+An interactive structure viewer with alongside its simulated diffraction pattern
+This code uses [fresnel](https://fresnel.readthedocs.io/en/stable/), [mbuild](https://mosdef.org/mbuild/index.html), and [cme_utils/diffractometer](https://bitbucket.org/cmelab/cme_utils/src/master/cme_utils/analyze/diffractometer.py)
 
 To install:
 1. Create environment and install necessary packages
 ```
 conda create -n diffract python=3.7
 conda activate diffract
-conda install -c conda-forge -c omnia -c mosdef pillow pytest sphinx sphinx_rtd_theme nbsphinx numpy matplotlib black isort jupyterlab mbuild fresnel pyside2 freud py3dmol openbabel;
-jupyter labextension install @ryantam626/jupyterlab_code_formatter;
-pip install jupyterlab_code_formatter;
-jupyter serverextension enable --py jupyterlab_code_formatter;
+conda install -c conda-forge -c omnia -c mosdef pillow numpy matplotlib mbuild fresnel pyside2 freud py3dmol openbabel jupyterlab;
 ```
 2. Clone and install the cme_utils package
 ```
