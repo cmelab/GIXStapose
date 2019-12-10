@@ -3,6 +3,9 @@ import warnings
 
 import matplotlib.cm
 import numpy as np
+import gsd
+import gsd.pygsd
+import gsd.hoomd
 
 import fresnel
 import freud
@@ -46,6 +49,50 @@ cpk_colors = {
 # Made space to add more later
 radii_dict = {"H": 0.05, "default": 0.06}
 
+
+def from_gsd(gsdfile, frame=-1, coords_only=False, scale=1.0):
+    """
+    Given a trajectory gsd file creates an mbuild.Compound.
+    If there are multiple separate molecules, they are returned
+    as one compound.
+
+    Parameters
+    ----------
+    gsdfile : str, filename
+    frame : int, frame number (default -1)
+    coords_only : bool (default False)
+        If True, return compound with no bonds
+    scale : float, scaling factor multiplied to coordinates (default 1.0)
+
+    Returns
+    -------
+    mbuild.Compound
+    """
+    f = gsd.pygsd.GSDFile(open(gsdfile, 'rb'))
+    t = gsd.hoomd.HOOMDTrajectory(f)
+
+    snap = t[frame]
+    bond_array = snap.bonds.group
+    n_atoms = snap.particles.N
+
+    # Add particles
+    comp = mb.Compound()
+    comp.box = snap.configuration.box[:3] * scale
+    for i in range(n_atoms):
+        name = snap.particles.types[snap.particles.typeid[i]]
+        xyz = snap.particles.position[i] * scale
+        charge = snap.particles.charge[i]
+
+        atom = mb.Particle(name=name, pos=xyz, charge=charge)
+        comp.add(atom, label=str(i))
+
+    if not coords_only:
+        # Add bonds
+        for i in range(bond_array.shape[0]):
+            atom1 = int(bond_array[i][0])
+            atom2 = int(bond_array[i][1])
+            comp.add_bond([comp[atom1], comp[atom2]])
+    return comp
 
 def distance(pos1, pos2):
     """
@@ -98,7 +145,7 @@ def mb_to_freud_box(box):
     return freud.box.Box(*box_list)
 
 
-def visualize(comp, color="cpk", scale=1.0, show_box=False):
+def visualize(comp, color="cpk", scale=1.0, box=None):
     """
     Visualize an mbuild Compound using fresnel.
 
@@ -107,8 +154,8 @@ def visualize(comp, color="cpk", scale=1.0, show_box=False):
     comp : (mbuild.Compound), compound to visualize
     color : ("cpk" or the name of a matplotlib colormap), color scheme to use (default "cpk")
     scale : (float), scaling factor for the particle, bond, and box radii (default 1.0)
-    show_box : (bool), whether or not to visualize the box. The function will first check if the
-        user has assigned a box to comp.box, if not, then it will use comp.boundingbox
+    box : (mb.Box), box object for the structure. If no box is provided,
+        comp.boundingbox is used
 
     Returns
     -------
@@ -196,10 +243,10 @@ def visualize(comp, color="cpk", scale=1.0, show_box=False):
         )
         bonds.radius[:] = [0.03 * scale] * N_bonds
 
-    if show_box:
+    if box:
         # Use comp.box, unless it does not exist, then use comp.boundingbox
         try:
-            freud_box = mb_to_freud_box(comp.box)
+            freud_box = mb_to_freud_box(box)
         except AttributeError:
             freud_box = mb_to_freud_box(comp.boundingbox)
         # Create box in fresnel
