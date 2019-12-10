@@ -1,5 +1,5 @@
 # diffract
-An interactive structure viewer with alongside its simulated diffraction pattern
+An interactive structure viewer alongside its simulated diffraction pattern
 This code uses [fresnel](https://fresnel.readthedocs.io/en/stable/), [mbuild](https://mosdef.org/mbuild/index.html), and [cme_utils/diffractometer](https://bitbucket.org/cmelab/cme_utils/src/master/cme_utils/analyze/diffractometer.py)
 
 To install:
