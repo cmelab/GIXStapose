@@ -27,7 +27,7 @@ class ApplicationWindow(QtWidgets.QWidget):
     def init_diffractometer(self, inputfile, frame):
         if inputfile is None:
             print("no input provided, showing simple cubic example")
-            inputfile = f"gixs_data/sc10.pdb"
+            inputfile = f"example_inputs/sc10.pdb"
         try:
             compound = from_gsd(inputfile, frame=frame)
         except RuntimeError:
