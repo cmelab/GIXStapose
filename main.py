@@ -1,20 +1,13 @@
 import numpy as np
 
-from matplotlib.backends.qt_compat import is_pyqt5 # QtCore, QtWidgets, is_pyqt5
 from PySide2 import QtCore, QtWidgets
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import (
-        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
-else:
-    from matplotlib.backends.backend_qt4agg import (
-        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-
 
 import fresnel
 import mbuild as mb
 
-from diffractometer import Diffractometer
+from diffractometer import Diffractometer, camera_to_rot
 import interact
 from draw_scene import visualize #Methane
 
@@ -32,6 +25,11 @@ class ApplicationWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.title = "diffractometer"
+
+        # Initialize the diffractometer
+        self.d = Diffractometer()
+        self.d.load(pdb.xyz, box.maxs)
+
         self.initUI()
 
     def initUI(self):
@@ -50,19 +48,6 @@ class ApplicationWindow(QtWidgets.QWidget):
 
         self.show()
 
-
-        #dynamic_canvas = FigureCanvas(Figure(figsize=(5, 3)))
-        #layout.addWidget(dynamic_canvas)
-        ##self.addToolBar(QtCore.Qt.BottomToolBarArea,
-        ##                NavigationToolbar(dynamic_canvas, self))
-
-        #self._dynamic_ax = dynamic_canvas.figure.subplots()
-        #t = np.linspace(0, 10, 101)
-        #self._dynamic_ax.plot(t, np.sin(t))
-        #self._dial.valueChanged.connect(self._update_canvas)
-
-        #self._dial.valueChanged.connect(self._update_text)
-
     def getCameraText(self, camera):
         pos = camera.position
         look = camera.look_at
@@ -80,8 +65,6 @@ class ApplicationWindow(QtWidgets.QWidget):
     def createGridLayout(self):
         self.horizontalGroupBox = QtWidgets.QGroupBox()
         layout = QtWidgets.QGridLayout()
-        #layout.setColumnStretch(1, 4)
-        #layout.setColumnStretch(2, 4)
 
         # Add the SceneView widget
         self._view = interact.SceneView(scene)
@@ -89,28 +72,32 @@ class ApplicationWindow(QtWidgets.QWidget):
         layout.addWidget(self._view,0,0)
 
         # Add the diffraction widget
-        self._diffract = QtWidgets.QLabel()
-        self._diffract.setText("diffraction pattern")
-        layout.addWidget(self._diffract,0,1)
+        dynamic_canvas = FigureCanvas(Figure(figsize=(15,15)))
+        layout.addWidget(dynamic_canvas,0,1)
+        self._diffract_ax = dynamic_canvas.figure.add_subplot(111)
+        self._diffract_ax.axis("off")
+        self._diffract_ax.set_axis_off()
+        self.plot_diffract(self._view.scene.camera)
 
         self.horizontalGroupBox.setLayout(layout)
-
-    #def _update_canvas(self):
-    #    self._dynamic_ax.clear()
-    #    val = self._dial.value()
-    #    # Shift the sinusoid as a function of time.
-    #    t = np.linspace(0, 10, 101)
-    #    self._dynamic_ax.plot(t, np.sin(t))
-    #    self._dynamic_ax.plot(val, np.sin(val),"ro")
-    #    self._dynamic_ax.figure.canvas.draw()
 
     def _update_camera(self, value):
         self._label.clear()
         # display the camera value
         self._label.setText(self.getCameraText(value))
+        self.plot_diffract(value)
 
-    def diffract(self, rot=None):
-        pass
+    def plot_diffract(self, camera):
+        self._diffract_ax.clear()
+        self._diffract_ax.axis("off")
+        rot = camera_to_rot(camera)
+
+        # diffraction pattern
+        dp = self.d.diffract(rot.T)
+        self._diffract_ax.imshow(dp, cmap="jet")
+        self._diffract_ax.figure.canvas.draw()
+
+
 
 
 
