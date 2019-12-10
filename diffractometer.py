@@ -6,6 +6,7 @@ import numpy as np
 from scipy import interpolate, ndimage
 
 from cme_utils.manip import pbc
+from cme_utils.manip.utilities import rotation_matrix_from_to as cme_rot
 
 
 class Diffractometer:
@@ -317,24 +318,24 @@ def camera_to_rot(camera):
 
     cam_vec = np.array(pos)-np.array(look_at)
 
-    # axis vectors
-    xvec = np.array([1,0,0])
-    yvec = np.array([0,1,0])
-    zvec = np.array([0,0,1])
+    ## axis vectors
+    #xvec = np.array([1,0,0])
+    #yvec = np.array([0,1,0])
+    #zvec = np.array([0,0,1])
 
-    # Project the camera vector into the xy, yz, and xz planes
-    # by subtracting the projection of the plane normal vector
-    cam_xy = cam_vec - vector_projection(cam_vec, zvec)
-    cam_yz = cam_vec - vector_projection(cam_vec, xvec)
-    cam_xz = cam_vec - vector_projection(cam_vec, yvec)
+    ## Project the camera vector into the xy, yz, and xz planes
+    ## by subtracting the projection of the plane normal vector
+    #cam_xy = cam_vec - vector_projection(cam_vec, zvec)
+    #cam_yz = cam_vec - vector_projection(cam_vec, xvec)
+    #cam_xz = cam_vec - vector_projection(cam_vec, yvec)
 
-    # find the angles betwen the camera vector projections and the axes vectors
-    # alpha is in the yz, beta xz, gamma xy
-    alpha = get_angle(cam_yz, yvec)
-    beta = get_angle(cam_xz, zvec)
-    gamma = get_angle(cam_xy, xvec)
+    ## find the angles betwen the camera vector projections and the axes vectors
+    ## alpha is in the yz, beta xz, gamma xy
+    #alpha = get_angle(cam_yz, yvec)
+    #beta = get_angle(cam_xz, zvec)
+    #gamma = get_angle(cam_xy, xvec)
 
-    return rot_mat(alpha, beta, gamma)
+    return cme_rot(cam_vec, np.array([0,0,1]))
 
 def rot_mat(alpha, beta, gamma):
     """
