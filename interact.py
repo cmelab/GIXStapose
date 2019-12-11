@@ -258,6 +258,9 @@ class SceneView(QtWidgets.QWidget):
         self.rendering = False;
 
     def start_rendering(self):
+        # emit the signal that rendering has started
+        self.c.update_camera.emit(self.scene.camera)
+
         self.rendering = True;
         self.samples = 0;
         self.tracer.reset()
@@ -301,9 +304,6 @@ class SceneView(QtWidgets.QWidget):
             self.camera_update_mode = 'pan';
 
     def mouseReleaseEvent(self, event):
-        # emit the signal to update the camera
-        self.c.update_camera.emit(self.scene.camera)
-
         if self.camera_update_mode is not None:
             self.camera_update_mode = None;
             event.accept()
