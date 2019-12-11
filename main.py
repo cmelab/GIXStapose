@@ -19,14 +19,14 @@ class ApplicationWindow(QtWidgets.QWidget):
         super().__init__()
         self.title = "diffractometer"
 
-        # Initialize the diffractometer
         self.init_diffractometer(inputfile, frame)
 
         self.initUI()
 
+
     def init_diffractometer(self, inputfile, frame):
         if inputfile is None:
-            print("no input provided, showing simple cubic example")
+            print("No input provided, showing simple cubic example")
             inputfile = f"example_inputs/sc10.pdb"
         try:
             compound = from_gsd(inputfile, frame=frame)
@@ -45,11 +45,9 @@ class ApplicationWindow(QtWidgets.QWidget):
         self.createGridLayout()
 
         windowlayout = QtWidgets.QVBoxLayout()
-        windowlayout.addWidget(self.horizontalGroupBox)
+        windowlayout.addWidget(self.tophorizontalGroupBox)
 
-        self._label = QtWidgets.QLabel()
-        self._label.setText(self.getCameraText(self._view.scene.camera))
-        windowlayout.addWidget(self._label)
+        windowlayout.addWidget(self.bothorizontalGroupBox)
 
         self.setLayout(windowlayout)
 
@@ -76,39 +74,77 @@ class ApplicationWindow(QtWidgets.QWidget):
         return text
 
     def createGridLayout(self):
-        self.horizontalGroupBox = QtWidgets.QGroupBox()
-        layout = QtWidgets.QGridLayout()
+        # Top grid with sceneview and diffraction pattern
+        self.tophorizontalGroupBox = QtWidgets.QGroupBox()
+        toplayout = QtWidgets.QGridLayout()
 
         # Add the SceneView widget
-        self._view = interact.SceneView(self.scene)
-        self._view.c.update_camera.connect(self._update_camera)
-        layout.addWidget(self._view, 0, 0)
+        self.view = interact.SceneView(self.scene)
+        self.view.c.update_camera.connect(self.update_camera)
+        toplayout.addWidget(self.view, 0, 0)
 
         # Add the diffraction widget
         dynamic_canvas = FigureCanvas(Figure(figsize=(15, 15)))
-        layout.addWidget(dynamic_canvas, 0, 1)
-        self._diffract_ax = dynamic_canvas.figure.add_subplot(111)
-        self._diffract_ax.axis("off")
-        self._diffract_ax.set_axis_off()
-        self.plot_diffract(self._view.scene.camera)
+        toplayout.addWidget(dynamic_canvas, 0, 1)
+        self.diffract_ax = dynamic_canvas.figure.add_subplot(111)
+        self.diffract_ax.axis("off")
+        self.diffract_ax.set_axis_off()
+        self.plot_diffract(self.view.scene.camera)
 
-        self.horizontalGroupBox.setLayout(layout)
+        self.tophorizontalGroupBox.setLayout(toplayout)
 
-    def _update_camera(self, value):
-        self._label.clear()
+        # Bottom grid with camera, buttons, zoom, sigma
+        self.bothorizontalGroupBox = QtWidgets.QGroupBox()
+        botlayout = QtWidgets.QGridLayout()
+
+        # Camera printout
+        self.label = QtWidgets.QLabel()
+        self.label.setText(self.getCameraText(self.view.scene.camera))
+        botlayout.addWidget(self.label, 0, 0)
+
+        # Buttons
+        self.button100 = QtWidgets.QPushButton(self)
+        self.button100.setText("100")
+        botlayout.addWidget(self.button100, 0, 1)
+
+        self.button110 = QtWidgets.QPushButton("110", self)
+        botlayout.addWidget(self.button110, 0, 2)
+
+        self.button111 = QtWidgets.QPushButton("111", self)
+        botlayout.addWidget(self.button111, 0, 3)
+
+        # thanks to this wonderful answer https://stackoverflow.com/a/57167056/11969403
+        self.button100.clicked.connect(lambda: self.move_camera((1,0,0)))
+        self.button110.clicked.connect(lambda: self.move_camera((1,1,0)))
+        self.button111.clicked.connect(lambda: self.move_camera((1,1,1)))
+
+        self.bothorizontalGroupBox.setLayout(botlayout)
+
+    def update_camera(self, camera):
+        self.label.clear()
         # display the camera value
-        self._label.setText(self.getCameraText(value))
-        self.plot_diffract(value)
+        self.label.setText(self.getCameraText(camera))
+        self.plot_diffract(camera)
 
     def plot_diffract(self, camera):
-        self._diffract_ax.clear()
-        self._diffract_ax.axis("off")
+        self.diffract_ax.clear()
+        self.diffract_ax.axis("off")
         rot = camera_to_rot(camera)
 
         # diffraction pattern
         dp = self.d.diffract(rot.T)
-        self._diffract_ax.imshow(dp, cmap="jet")
-        self._diffract_ax.figure.canvas.draw()
+        self.diffract_ax.imshow(dp, cmap="jet")
+        self.diffract_ax.figure.canvas.draw()
+        self.repaint()
+
+    def move_camera(self, pos):
+        camera = fresnel.camera.orthographic(
+                position=pos, look_at=(0,0,0), up=(0,0,1), height=1.5
+                )
+        self.view.scene.camera = camera
+        #self.repaint()
+        self.view.start_rendering()
+        self.view.update()
 
 
 if __name__ == "__main__":
