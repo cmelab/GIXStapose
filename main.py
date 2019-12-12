@@ -53,26 +53,6 @@ class ApplicationWindow(QtWidgets.QWidget):
 
         self.show()
 
-    def getCameraText(self, camera):
-        pos = camera.position
-        look = camera.look_at
-        text = "".join(
-            [
-                "Camera\n",
-                "   position : {0:.3f} {1:.3f} {2:.3f}\n".format(
-                    pos[0], pos[1], pos[2]
-                ),
-                "   look at :  {0:.3f} {1:.3f} {2:.3f}\n".format(
-                    look[0], look[1], look[2]
-                ),
-                "   up :       {0:.3f} {1:.3f} {2:.3f}\n".format(
-                    camera.up[0], camera.up[1], camera.up[2]
-                ),
-                "   height :   {0:.3f}".format(camera.height),
-            ]
-        )
-        return text
-
     def createGridLayout(self):
         # Top grid with sceneview and diffraction pattern
         self.tophorizontalGroupBox = QtWidgets.QGroupBox()
@@ -99,31 +79,81 @@ class ApplicationWindow(QtWidgets.QWidget):
 
         # Camera printout
         self.label = QtWidgets.QLabel()
-        self.label.setText(self.getCameraText(self.view.scene.camera))
-        botlayout.addWidget(self.label, 0, 0)
+        self.label.setText(self.camera_text(self.view.scene.camera))
+        # widget, row, col, rowspan, colspan
+        botlayout.addWidget(self.label, 0, 0, 2, 1)
 
         # Buttons
-        self.button100 = QtWidgets.QPushButton(self)
-        self.button100.setText("100")
-        botlayout.addWidget(self.button100, 0, 1)
+        self.button100 = QtWidgets.QPushButton("100")
+        self.button100.setMaximumSize(QtCore.QSize(100,40))
+        botlayout.addWidget(self.button100, 0, 1, 2, 1)
 
-        self.button110 = QtWidgets.QPushButton("110", self)
-        botlayout.addWidget(self.button110, 0, 2)
+        self.button110 = QtWidgets.QPushButton("110")
+        self.button110.setMaximumSize(QtCore.QSize(100,40))
+        botlayout.addWidget(self.button110, 0, 2, 2, 1)
 
-        self.button111 = QtWidgets.QPushButton("111", self)
-        botlayout.addWidget(self.button111, 0, 3)
+        self.button111 = QtWidgets.QPushButton("111")
+        self.button111.setMaximumSize(QtCore.QSize(100,40))
+        botlayout.addWidget(self.button111, 0, 3, 2, 1)
 
+        # Connect buttons to moving the camera
         # thanks to this wonderful answer https://stackoverflow.com/a/57167056/11969403
         self.button100.clicked.connect(lambda: self.move_camera((1,0,0)))
         self.button110.clicked.connect(lambda: self.move_camera((1,1,0)))
         self.button111.clicked.connect(lambda: self.move_camera((1,1,1)))
 
+        # Add space between buttons and slider
+        botlayout.setColumnMinimumWidth(4,350)
+
+        # Zoom slider
+        zlabel = QtWidgets.QLabel("Zoom")
+        zlabel.setAlignment(QtCore.Qt.AlignCenter)
+        botlayout.addWidget(zlabel, 0, 5)
+
+        self.zooms = [i for i in range(1, self.d.N) if self.d.N % i == 0]
+        self.zoomslider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.zoomslider.setMinimum(0)
+        self.zoomslider.setMaximum(len(self.zooms)-1)
+        self.zoomslider.setValue(self.zooms.index(self.d.zoom))
+        self.zoomslider.valueChanged.connect(self.change_zoom)
+        self.zoomslider.setMaximumSize(QtCore.QSize(600,30))
+        botlayout.addWidget(self.zoomslider, 1, 5)
+
+        botlayout.setColumnMinimumWidth(6,50)
+
         self.bothorizontalGroupBox.setLayout(botlayout)
+
+    def change_zoom(self):
+        self.d.zoom = self.zooms[self.zoomslider.value()]
+        self.plot_diffract(self.view.scene.camera)
+
+    def camera_text(self, camera):
+        """
+        convert a fresnel.Camera object to a readable string
+        """
+        pos = camera.position
+        look = camera.look_at
+        text = "".join(
+            [
+                "Camera\n",
+                "   position : {0:.3f} {1:.3f} {2:.3f}\n".format(
+                    pos[0], pos[1], pos[2]
+                ),
+                "   look at :  {0:.3f} {1:.3f} {2:.3f}\n".format(
+                    look[0], look[1], look[2]
+                ),
+                "   up :       {0:.3f} {1:.3f} {2:.3f}\n".format(
+                    camera.up[0], camera.up[1], camera.up[2]
+                ),
+                "   height :   {0:.3f}".format(camera.height),
+            ]
+        )
+        return text
 
     def update_camera(self, camera):
         self.label.clear()
         # display the camera value
-        self.label.setText(self.getCameraText(camera))
+        self.label.setText(self.camera_text(camera))
         self.plot_diffract(camera)
 
     def plot_diffract(self, camera):
