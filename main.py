@@ -4,7 +4,12 @@ import fresnel
 import mbuild as mb
 import numpy as np
 # PySide2 must be imported before matplotlib -- isort will switch these
-from PySide2 import QtCore, QtWidgets
+from PySide2.QtCore import QSize, Qt
+from PySide2.QtWidgets import (
+        QMainWindow, QWidget, QVBoxLayout, QGroupBox,
+        QGridLayout, QLabel, QPushButton, QSlider,
+        QApplication, QAction
+        )
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -13,16 +18,15 @@ from diffractometer import Diffractometer, camera_to_rot
 from draw_scene import visualize, from_gsd
 
 
-
-class ApplicationWindow(QtWidgets.QWidget):
+class ApplicationWindow(QMainWindow):
     def __init__(self, inputfile, frame):
         super().__init__()
+
         self.title = "diffractometer"
 
         self.init_diffractometer(inputfile, frame)
 
         self.initUI()
-
 
     def init_diffractometer(self, inputfile, frame):
         if inputfile is None:
@@ -42,21 +46,32 @@ class ApplicationWindow(QtWidgets.QWidget):
     def initUI(self):
         self.setWindowTitle(self.title)
 
+        # Menubar
+        menubar = self.menuBar()
+        filemenu = menubar.addMenu("File")
+        render = QAction("Render Scene", self)
+        export = QAction("Export Diffraction Pattern", self)
+        filemenu.addAction(render)
+        filemenu.addAction(export)
+        filemenu.triggered[QAction].connect(self.processtrigger)
+
+        self.main = QWidget()
+        self.setCentralWidget(self.main)
+
+        # creates 'top' and 'bot' horizontalgroupbox grid layout objects
         self.createGridLayout()
 
-        windowlayout = QtWidgets.QVBoxLayout()
+        windowlayout = QVBoxLayout()
         windowlayout.addWidget(self.tophorizontalGroupBox)
-
         windowlayout.addWidget(self.bothorizontalGroupBox)
-
-        self.setLayout(windowlayout)
+        self.main.setLayout(windowlayout)
 
         self.show()
 
     def createGridLayout(self):
         # Top grid with sceneview and diffraction pattern
-        self.tophorizontalGroupBox = QtWidgets.QGroupBox()
-        toplayout = QtWidgets.QGridLayout()
+        self.tophorizontalGroupBox = QGroupBox()
+        toplayout = QGridLayout()
 
         # Add the SceneView widget
         self.view = interact.SceneView(self.scene)
@@ -74,26 +89,26 @@ class ApplicationWindow(QtWidgets.QWidget):
         self.tophorizontalGroupBox.setLayout(toplayout)
 
         # Bottom grid with camera, buttons, zoom, sigma
-        self.bothorizontalGroupBox = QtWidgets.QGroupBox()
-        botlayout = QtWidgets.QGridLayout()
+        self.bothorizontalGroupBox = QGroupBox()
+        botlayout = QGridLayout()
 
         # Camera printout
-        self.label = QtWidgets.QLabel()
+        self.label = QLabel()
         self.label.setText(self.camera_text(self.view.scene.camera))
         # widget, row, col, rowspan, colspan
         botlayout.addWidget(self.label, 0, 0, 2, 1)
 
         # Buttons
-        self.button100 = QtWidgets.QPushButton("100")
-        self.button100.setMaximumSize(QtCore.QSize(100,40))
+        self.button100 = QPushButton("100")
+        self.button100.setMaximumSize(QSize(100,40))
         botlayout.addWidget(self.button100, 0, 1, 2, 1)
 
-        self.button110 = QtWidgets.QPushButton("110")
-        self.button110.setMaximumSize(QtCore.QSize(100,40))
+        self.button110 = QPushButton("110")
+        self.button110.setMaximumSize(QSize(100,40))
         botlayout.addWidget(self.button110, 0, 2, 2, 1)
 
-        self.button111 = QtWidgets.QPushButton("111")
-        self.button111.setMaximumSize(QtCore.QSize(100,40))
+        self.button111 = QPushButton("111")
+        self.button111.setMaximumSize(QSize(100,40))
         botlayout.addWidget(self.button111, 0, 3, 2, 1)
 
         # Connect buttons to moving the camera
@@ -106,22 +121,28 @@ class ApplicationWindow(QtWidgets.QWidget):
         botlayout.setColumnMinimumWidth(4,350)
 
         # Zoom slider
-        zlabel = QtWidgets.QLabel("Zoom")
-        zlabel.setAlignment(QtCore.Qt.AlignCenter)
+        zlabel = QLabel("Zoom")
+        zlabel.setAlignment(Qt.AlignCenter)
         botlayout.addWidget(zlabel, 0, 5)
 
         self.zooms = [i for i in range(1, self.d.N) if self.d.N % i == 0]
-        self.zoomslider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.zoomslider = QSlider(Qt.Horizontal)
         self.zoomslider.setMinimum(0)
         self.zoomslider.setMaximum(len(self.zooms)-1)
         self.zoomslider.setValue(self.zooms.index(self.d.zoom))
         self.zoomslider.valueChanged.connect(self.change_zoom)
-        self.zoomslider.setMaximumSize(QtCore.QSize(600,30))
+        self.zoomslider.setMaximumSize(QSize(600,30))
         botlayout.addWidget(self.zoomslider, 1, 5)
 
         botlayout.setColumnMinimumWidth(6,50)
 
         self.bothorizontalGroupBox.setLayout(botlayout)
+
+    def processtrigger(self, q):
+        if q.text() == "Render Scene":
+            print("rs")
+        elif q.text() == "Export Diffraction Pattern":
+            print("edp")
 
     def change_zoom(self):
         self.d.zoom = self.zooms[self.zoomslider.value()]
@@ -185,7 +206,7 @@ if __name__ == "__main__":
         help="if trajectory file is given, which frame to diffract (default -1 or last frame)")
     args = parser.parse_args()
 
-    qapp = QtWidgets.QApplication([])
+    qapp = QApplication([])
 
     app = ApplicationWindow(args.input, args.frame)
     app.show()
