@@ -1,8 +1,10 @@
 import argparse
+import os
 
 import fresnel
 import mbuild as mb
 import numpy as np
+import PIL
 # PySide2 must be imported before matplotlib -- isort will switch these
 from PySide2.QtCore import QSize, Qt
 from PySide2.QtWidgets import (
@@ -12,6 +14,7 @@ from PySide2.QtWidgets import (
         )
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 import interact
 from diffractometer import Diffractometer, camera_to_rot
@@ -24,14 +27,18 @@ class ApplicationWindow(QMainWindow):
 
         self.title = "diffractometer"
 
+        if inputfile is None:
+            print("No input provided, showing simple cubic example")
+            inputfile = f"example_inputs/sc10.pdb"
+        self.basename = os.path.basename(inputfile).split(".")[0]
+        self.render_counter = 0
+        self.diffract_counter = 0
+
         self.init_diffractometer(inputfile, frame)
 
         self.initUI()
 
     def init_diffractometer(self, inputfile, frame):
-        if inputfile is None:
-            print("No input provided, showing simple cubic example")
-            inputfile = f"example_inputs/sc10.pdb"
         try:
             compound = from_gsd(inputfile, frame=frame)
         except RuntimeError:
@@ -140,9 +147,24 @@ class ApplicationWindow(QMainWindow):
 
     def processtrigger(self, q):
         if q.text() == "Render Scene":
-            print("rs")
+            print("Rendering...")
+            output = fresnel.pathtrace(self.view.scene, light_samples=40, w=600, h=600)
+            filename = f"{self.basename}_scene{self.render_counter}.png"
+
+            image = PIL.Image.fromarray(output[:], mode='RGBA')
+            image.save(filename, dpi=(300, 300))
+
+            old_camera = self.view.scene.camera
+            print(f"Rendered {filename}")
+            self.render_counter += 1
+
         elif q.text() == "Export Diffraction Pattern":
-            print("edp")
+            print("Saving diffraction pattern...")
+            filename = f"{self.basename}_dp{self.diffract_counter}.png"
+
+            plt.imsave(filename, self.dp, cmap="jet")
+            print(f"Diffraction pattern saved as {filename}")
+            self.diffract_counter += 1
 
     def change_zoom(self):
         self.d.zoom = self.zooms[self.zoomslider.value()]
@@ -150,7 +172,7 @@ class ApplicationWindow(QMainWindow):
 
     def camera_text(self, camera):
         """
-        convert a fresnel.Camera object to a readable string
+        Convert a fresnel.Camera object to a readable string
         """
         pos = camera.position
         look = camera.look_at
@@ -183,8 +205,8 @@ class ApplicationWindow(QMainWindow):
         rot = camera_to_rot(camera)
 
         # diffraction pattern
-        dp = self.d.diffract(rot.T)
-        self.diffract_ax.imshow(dp, cmap="jet")
+        self.dp = self.d.diffract(rot.T)
+        self.diffract_ax.imshow(self.dp, cmap="jet")
         self.diffract_ax.figure.canvas.draw()
         self.repaint()
 
