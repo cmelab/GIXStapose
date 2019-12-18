@@ -26,5 +26,5 @@ to run a simple-cubic example or
 ```
 python main.py -i INPUTFILE
 ```
-to load an input file format supported by [MDTraj](http://mdtraj.org/1.8.0/load_functions.html) or a [gsd file](https://gsd.readthedocs.io/en/stable/).
+to load an input file format supported by [MDTraj](http://mdtraj.org/1.8.0/load_functions.html) (e.g., pdb, xml, dcd, xyz, hoomdxml) or a [gsd file](https://gsd.readthedocs.io/en/stable/).
 
