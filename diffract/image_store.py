@@ -52,7 +52,7 @@ class Steganography(object):
             if len(self.i) > len(input_data):
                 self.i = input_data
                 self.enc = False
-        print("SELF.I : ", self.i)
+
         self.i_ord = [i for i in self.i]
         self.i_len = len(self.i_ord)
         if not self.o_ignore:
@@ -260,8 +260,8 @@ class ImageHelper(object):
         px = im.load()
 
         # Write to image
-        height_range = list(range(height))
-        width_range = list(range(width))
+        height_range = range(height)
+        width_range = range(width)
         for y in height_range:
             for x in width_range:
                 position = 3 * (x + y * width)
@@ -334,6 +334,7 @@ def save_file(path, data):
 
 class EncodeImage(object):
     """Groups together functions for encoding an image.
+
     Usage:
         encoded = EncodeImage('folder/file.mp3', True).set_background('http://website/im.jpg')
         encoded.save('folder/encodedimage')
@@ -372,6 +373,7 @@ class EncodeImage(object):
 class DecodeImage(object):
     """Groups together functions for decoding an image.
     Using a marker set in EncodeImage, the filetype is preserved.
+
     Usage:
         decoded = DecodeImage('folder/encodedimage.png')
         if decoded.is_file:
