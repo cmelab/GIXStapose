@@ -1,18 +1,17 @@
 import base64
 import os
 import pickle
+import random
 import time
-import urllib.error
-import urllib.parse
-import urllib.request
 import zlib
-from io import StringIO
+from io import BytesIO
 from math import ceil
 
 import numpy as np
+import requests
 from PIL import Image
 
-DEBUG = True
+DEBUG = False
 
 
 def trim_bytes(numpy_array, num_bytes):
@@ -25,12 +24,20 @@ def split_input(value, n):
 
 
 def encode_input(value):
-    return pickle.dumps(value, protocol=0)
+    return zlib.compress(pickle.dumps(value, protocol=0))
 
 
 def decode_input(value):
     val_bytes = value.encode("latin-1")
-    return pickle.loads(val_bytes)
+    return pickle.loads(zlib.decompress(val_bytes))
+
+
+def _print(message, value=None, indent=0):
+    if DEBUG:
+        if value is None:
+            print(f"{' ' * indent}{message}")
+        else:
+            print(f"{' ' * indent}{message}: {value}")
 
 
 class Steganography(object):
@@ -47,13 +54,15 @@ class Steganography(object):
         # Detect whether the input should be compressed
         self.enc = True
         if isinstance(input_data, str):
-            print(f"Encoded length: {len(self.i)}")
-            print(f"Normal length: {len(input_data)}")
+            _print(f"Encoded length: {len(self.i)}")
+            _print(f"Normal length: {len(input_data)}")
             if len(self.i) > len(input_data):
                 self.i = input_data
                 self.enc = False
-
-        self.i_ord = [i for i in self.i]
+        if isinstance(self.i[0], int):
+            self.i_ord = [i for i in self.i]
+        else:
+            self.i_ord = [ord(i) for i in self.i]
         self.i_len = len(self.i_ord)
         if not self.o_ignore:
             self.o_len = len(self.o)
@@ -98,25 +107,25 @@ class Steganography(object):
 
         header[1] = int(marker[1] + str(int(self.enc)) + "{0:04b}".format(i + 1), 2)
 
-        print("Bytes per colour", bytes_per_colour)
-        print("Input length", self.i_len)
-        print("Compressed", bool(self.enc))
-        print("Header bytes", len(header))
+        _print("Bytes per colour", bytes_per_colour, indent=1)
+        _print("Input length", self.i_len, indent=1)
+        _print("Compressed", bool(self.enc), indent=1)
+        _print("Header bytes", len(header), indent=1)
         if not self.o_ignore:
-            print("Total bytes available", self.o_len)
-            print("Remaining bytes", bytes_available)
+            _print("Total bytes available", self.o_len, indent=1)
+            _print("Remaining bytes", bytes_available, indent=1)
 
         return header, bytes_per_colour
 
     def encode(self):
 
         # Generate header
-        print("Generating header...")
+        _print("Generating header...")
         data, bytes_per_colour = self.generate_header()
 
         # Convert data
         if not self.o_ignore:
-            print("Converting input data to binary...")
+            _print("Converting input data to binary...")
             trimmed_original = trim_bytes(self.o, bytes_per_colour)
             format_binary = "{0:0" + "{}".format(8 - bytes_per_colour) + "b}"
             original_bytes = [format_binary.format(i) for i in trimmed_original]
@@ -127,7 +136,7 @@ class Steganography(object):
         new_bytes[-1] += "0" * (bytes_per_colour - len(new_bytes[-1]))
 
         # Increase length until both inputs match
-        print("Matching length...")
+        _print("Matching length...")
         if bytes_per_colour == 8:
             required_length = len(data)
         else:
@@ -139,9 +148,12 @@ class Steganography(object):
                 break
             extra_length = min(new_byte_len, required_length - new_byte_len)
             new_bytes += new_bytes[:extra_length]
-            print(f"Increased length from {new_byte_len} to {new_byte_len + extra_length}")
+            _print(
+                f"Increased length from {new_byte_len} to {new_byte_len + extra_length}",
+                indent=1,
+            )
 
-        print("Completed encoding")
+        _print("Completed encoding")
         if bytes_per_colour == 8:
             return data + [int(i, 2) for i in new_bytes]
         else:
@@ -161,25 +173,25 @@ class Steganography(object):
 
         num_bytes = int("".join("{0:08b}".format(i) for i in data[3 : data[2] + 4]), 2)
 
-        print("Bytes per colour", bytes_per_colour)
-        print("Input length", num_bytes)
-        print("Compressed", bool(encoded))
+        _print("Bytes per colour", bytes_per_colour, indent=1)
+        _print("Input length", num_bytes, indent=1)
+        _print("Compressed", bool(encoded), indent=1)
 
         return data[data[2] + 4 :], bytes_per_colour, data[2], num_bytes, encoded
 
     @classmethod
     def decode(self, data):
 
-        print("Reading header...")
+        _print("Reading header...")
         data, bytes_per_colour, data_len, num_bytes, encoded = self.read_header(data)
 
-        print("Decoding data...")
+        _print("Decoding data...")
         encoded_data = split_input(
-                ''.join(f'{i:08b}'[8 - bytes_per_colour:] for i in data), 8
+            "".join(f"{i:08b}"[8 - bytes_per_colour :] for i in data), 8
         )[:num_bytes]
         decoded_data = "".join(chr(int(i, 2)) for i in encoded_data)
 
-        print("Completed decoding")
+        _print("Completed decoding")
         if encoded:
             return decode_input(decoded_data)
         else:
@@ -194,13 +206,21 @@ class ImageHelper(object):
         self.fsize = None
 
     def read_file(self, optional_path=None):
-        print("Reading file...")
+        _print("Reading file...")
         path = optional_path or self.path
         im = Image.open(path).convert("RGB")
         self.image = np.asarray(im).ravel()
         self.size = im.size
-        print("Image dimensions", self.size)
+        _print("Image dimensions", self.size, indent=1)
         return self.image, self.size
+
+    def read_url(self, optional_url=None):
+        url = optional_url or self.path
+        _print("Downloading URL contents...")
+        r = requests.get(url)
+        if r.status_code == 200:
+            image_bytes = BytesIO(r.content)
+        return self.read_file(image_bytes)
 
     @classmethod
     def generate_save_info(self, data_len, width, height, ratio):
@@ -229,20 +249,19 @@ class ImageHelper(object):
         height = int(max(1, min(height, data_len)))
 
         while width * height < data_len:
-            # print 'Increased height'
             height += 1
 
         return width, height
 
     def save(self, data, width=None, height=None, ratio=None):
-        print("Saving image...")
+        _print("Saving image...")
         data_len = len(data)
         padding_required = data_len % 3
         if not isinstance(data, list):
             data = list(data)
         data += [random.randint(0, 255) for _ in range(padding_required)]
 
-        print("Calculating dimensions")
+        _print("Calculating dimensions", indent=1)
         # Get the with and height of the data
         data_len = len(data)
         info = self.generate_save_info(data_len // 3, width, height, ratio)
@@ -254,7 +273,7 @@ class ImageHelper(object):
         remaining_pixels = width * height * 3 - data_len
         data += data[previous_row + width - remaining_pixels : start_of_row]
 
-        print("Building image")
+        _print("Building image", indent=1)
         # Create image object
         im = Image.new("RGB", (width, height))
         px = im.load()
@@ -267,11 +286,24 @@ class ImageHelper(object):
                 position = 3 * (x + y * width)
                 px[x, y] = tuple(data[position : position + 3])
 
+        # _print("Calculating filesize", indent=1)
+        ## Get the filesize
+        # temporary_image = StringIO.StringIO()
+        # im.save(temporary_image, "PNG")
+        # filesize = len(temporary_image.getvalue())
+        # temporary_image.close()
+        # _print("Filesize", filesize, indent=2)
+
         im.save(self.path, "PNG")
-        print("Saved image")
+        _print("Saved image")
 
         self.image = data
         self.size = (width, height)
+
+
+class ImgurHelper(object):
+    def __init__(self):
+        pass
 
 
 class EncodeData(object):
@@ -314,11 +346,10 @@ class EncodeData(object):
                     width = self.original_size[0]
                 elif height is None and ratio is None:
                     height = self.original_size[1]
-            filesize = ImageHelper(self.path).save(
+            ImageHelper(self.path).save(
                 result["Data"], width=width, height=height, ratio=ratio
             )
             result["Path"] = self.path
-            result["Size"] = filesize
         return result
 
 
@@ -342,7 +373,7 @@ class EncodeImage(object):
         #Result: folder/encodedimage.png
     """
 
-    def __init__(self, data, is_file=False):
+    def __init__(self, data, is_file):
 
         if is_file:
             ext = os.path.splitext(data)[1]
@@ -352,22 +383,36 @@ class EncodeImage(object):
 
         self.clear_background()
 
-    def set_background(self, path):
-        self.image, self.size = ImageHelper(path).read_file()
+    def set_background(self, path, is_url=None):
+        if (
+            is_url
+            or is_url is None
+            and any(path.startswith(i) for i in ("http", "https", "ftp"))
+        ):
+            self.image, self.size = ImageHelper(path).read_url()
+        else:
+            self.image, self.size = ImageHelper(path).read_file()
+        return self
 
     def clear_background(self):
         self.image = self.size = None
+        return self
 
     def save(self, path, ratio=None, width=None, height=None):
         if self.size is not None:
             if width is None and height is None and ratio is None:
                 width, height = self.size
         if self.image is not None:
-            encoded_data = Steganography(self.data, self.image).encode()
+            result = {"Data": Steganography(self.data, self.image).encode()}
         else:
-            encoded_data = Steganography(self.data).encode()
+            result = {"Data": Steganography(self.data).encode()}
 
-        ImageHelper(path).save(encoded_data, width=width, height=height, ratio=ratio)
+        filesize = ImageHelper(path).save(
+            result["Data"], width=width, height=height, ratio=ratio
+        )
+        result["Path"] = path
+        result["Size"] = filesize
+        return result
 
 
 class DecodeImage(object):
@@ -382,9 +427,16 @@ class DecodeImage(object):
             print decoded
     """
 
-    def __init__(self, path):
+    def __init__(self, path, is_url=None):
 
-        image, size = ImageHelper(path).read_file()
+        if (
+            is_url
+            or is_url is None
+            and any(path.startswith(i) for i in ("http", "https", "ftp"))
+        ):
+            image, size = ImageHelper(path).read_url()
+        else:
+            image, size = ImageHelper(path).read_file()
         self.decode = Steganography.decode(image)
         self.is_file = False
 
@@ -403,3 +455,7 @@ class DecodeImage(object):
             # This needs improvement, but works for now
             path += ".{}".format(self.ext)
         save_file(path, self.decode)
+
+
+if __name__ == "__main__":
+    DEBUG = True
