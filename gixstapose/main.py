@@ -25,7 +25,7 @@ class ApplicationWindow(QMainWindow):
     def __init__(self, inputfile, frame):
         super().__init__()
 
-        self.title = "diffractometer"
+        self.title = "GIXStapose"
 
         if inputfile is None:
             print("No input provided, showing simple cubic example")
