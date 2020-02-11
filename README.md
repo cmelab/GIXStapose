@@ -7,9 +7,7 @@ This code uses [fresnel](https://fresnel.readthedocs.io/en/stable/), [mbuild](ht
 To install:
 1. Create environment and install necessary packages
 ```
-conda create -y -n GIXStapose python=3.7
-conda activate GIXStapose
-conda install -y -c conda-forge -c omnia -c mosdef pillow numpy matplotlib mbuild fresnel pyside2 freud py3dmol openbabel jupyter
+conda create -y -n GIXStapose -c conda-forge -c omnia -c mosdef python=3.7 pillow numpy matplotlib mbuild fresnel pyside2 freud py3dmol openbabel
 ```
 2. Clone and install the cme_utils package
 ```
