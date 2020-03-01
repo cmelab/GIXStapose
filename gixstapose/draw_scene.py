@@ -46,6 +46,18 @@ cpk_colors = {
     "default": fresnel.color.linear([0.87, 0.47, 1.00]),  # pink
 }
 
+bsu_colors = [
+        fresnel.color.linear([0.00, 0.20, 0.63]), # blue
+        fresnel.color.linear([0.84, 0.30, 0.04]), # orange
+        fresnel.color.linear([0.00, 0.23, 0.44]), # blue
+        fresnel.color.linear([0.00, 0.42, 0.65]), # blue
+        fresnel.color.linear([0.00, 0.45, 0.81]), # blue
+        fresnel.color.linear([0.25, 0.38, 0.60]), # blue
+        fresnel.color.linear([0.17, 0.99, 1.00]), # blue
+        fresnel.color.linear([1.00, 0.39, 0.03]), # orange
+        fresnel.color.linear([1.00, 0.40, 0.00]), # orange
+        ]
+
 # Made space to add more later
 radii_dict = {"H": 0.05, "default": 0.06}
 
@@ -152,7 +164,7 @@ def visualize(comp, color="cpk", scale=1.0, box=None):
     Parameters
     ----------
     comp : (mbuild.Compound), compound to visualize
-    color : ("cpk" or the name of a matplotlib colormap), color scheme to use (default "cpk")
+    color : ("cpk", "bsu", or the name of a matplotlib colormap), color scheme to use (default "cpk")
     scale : (float), scaling factor for the particle, bond, and box radii (default 1.0)
     box : (mb.Box), box object for the structure. If no box is provided,
         comp.boundingbox is used
@@ -180,6 +192,13 @@ def visualize(comp, color="cpk", scale=1.0, box=None):
                 color_array[i, :] = cpk_colors[n]
             except KeyError:
                 color_array[i, :] = cpk_colors["default"]
+    elif color == "bsu":
+        # Populate the color array with the brand standard bsu colors
+        # https://www.boisestate.edu/communicationsandmarketing/brand-standards/colors/
+        # if there are more unique particle names than colors, colors will be reused
+        unique_names = list(set(particle_names))
+        for i, n in enumerate(particle_names):
+            color_array[i, :] = bsu_colors[uniq_atoms.index(n) % len(bsu_colors)]
     else:
         # Populate the color_array with colors based on particle name
         # choose colors evenly distributed through a matplotlib colormap
