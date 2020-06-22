@@ -206,7 +206,7 @@ def visualize(comp, color="cpk", scale=1.0, box=None):
             cmap = matplotlib.cm.get_cmap(name=color)
         except ValueError:
             print(
-                "The 'color' argument takes either 'cpk' or the name of a matplotlib colormap."
+                "The 'color' argument takes either 'cpk', 'bsu', or the name of a matplotlib colormap."
             )
             raise
         mapper = matplotlib.cm.ScalarMappable(
