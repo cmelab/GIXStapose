@@ -6,10 +6,6 @@ As such, this tool has potential to aid in the [reproducible generation of figur
 
 GIXStapose is made possible by open-source packages, including the high-quality rendering of the [Fresnel ray-tracer](https://fresnel.readthedocs.io/en/stable/), the ability to read in multiple chemical file formats of [MBuild](https://mosdef.org/mbuild/index.html), and numpy's fast Fourier implementations used in [interactive diffraction analysis](https://bitbucket.org/cmelab/cme_utils/src/master/cme_utils/analyze/diffractometer.py), and by funding from the National Science Foundation (#1835593)
 
-Related citations:
-[Jones, M. L., & Jankowski, E. (2017). Computationally connecting organic photovoltaic performance to atomistic arrangements and bulk morphology. Molecular Simulation, 43(10–11), 1–18. https://doi.org/10.1080/08927022.2017.1296958](http://dx.doi.org/10.1080/08927022.2017.1296958)
-[Miller, E. D., Jones, M. L., Henry, M. M., Chery, P., Miller, K., & Jankowski, E. (2018). Optimization and Validation of Efficient Models for Predicting Polythiophene Self-Assembly. Polymers, 10(12), 1305. https://doi.org/10.3390/polym10121305](https://doi.org/10.3390/polym10121305)
-
 ![A screen capture of GIXStapose in action](screenshot.gif)
 
 To install:
@@ -28,3 +24,8 @@ to load an input file format supported by [MDTraj](http://mdtraj.org/1.8.0/load_
 python gixstapose/main.py -i INPUTFILE
 ```
 
+Related citations:
+
+[Jones, M. L., & Jankowski, E. (2017). Computationally connecting organic photovoltaic performance to atomistic arrangements and bulk morphology. Molecular Simulation, 43(10–11), 1–18. https://doi.org/10.1080/08927022.2017.1296958](http://dx.doi.org/10.1080/08927022.2017.1296958)
+
+[Miller, E. D., Jones, M. L., Henry, M. M., Chery, P., Miller, K., & Jankowski, E. (2018). Optimization and Validation of Efficient Models for Predicting Polythiophene Self-Assembly. Polymers, 10(12), 1305. https://doi.org/10.3390/polym10121305](https://doi.org/10.3390/polym10121305)
