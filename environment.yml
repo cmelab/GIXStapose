@@ -1,0 +1,20 @@
+name: gixstapose
+channels:
+  - conda-forge
+  - mosdef
+  - omnia
+dependencies:
+  - python=3.7
+  - pip
+  - matplotlib
+  - numpy
+  - pillow
+  - freud
+  - fresnel
+  - gsd
+  - mbuild
+  - openbabel
+  - py3Dmol
+  - pyside2
+  - pip:
+    - git+https://bitbucket.org:cmelab/cme_utils.git
