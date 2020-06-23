@@ -1,3 +1,4 @@
+![CI](https://github.com/cmelab/GIXStapose/workflows/CI/badge.svg)
 # GIXStapose
 GIXStapose is a new interactive analysis tool for for studying semi-crystalline and soft materials structures. It enables grazing incidence X-ray scattering (GIXS) patterns to be visualized while interactively rotating chemical structures, especially periodic simulation volumes generated from molecular simulations.
 
