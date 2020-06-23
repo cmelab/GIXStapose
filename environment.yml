@@ -17,4 +17,4 @@ dependencies:
   - py3Dmol
   - pyside2
   - pip:
-    - git+https://bitbucket.org:cmelab/cme_utils.git
+    - git+https://bitbucket.org/cmelab/cme_utils

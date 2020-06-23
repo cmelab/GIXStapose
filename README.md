@@ -13,15 +13,10 @@ Related citations:
 ![A screen capture of GIXStapose in action](screenshot.gif)
 
 To install:
-1. Create environment and install necessary packages
+1. Create and activate environment
 ```
-conda create -y -n GIXStapose -c conda-forge -c omnia -c mosdef python=3.7 pillow numpy matplotlib mbuild fresnel pyside2 freud py3dmol openbabel
-```
-2. Clone and install the cme_utils package
-```
-git clone git@bitbucket.org:cmelab/cme_utils.git
-cd cme_utils
-pip install .
+conda env create -f environment.yml;
+conda activate gixstapose
 ```
 
 To run a simple cubic example:
