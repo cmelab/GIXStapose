@@ -1,5 +1,6 @@
 import argparse
 import os
+from pathlib import Path
 
 import fresnel
 import mbuild as mb
@@ -29,7 +30,8 @@ class ApplicationWindow(QMainWindow):
 
         if inputfile is None:
             print("No input provided, showing simple cubic example")
-            inputfile = f"example_inputs/sc10.pdb"
+            path = Path(__file__).parent / "data/sc10.pdb"
+            inputfile = str(path.resolve())
         self.basename = os.path.basename(inputfile).split(".")[0]
         self.render_counter = 0
         self.diffract_counter = 0
