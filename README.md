@@ -7,7 +7,7 @@ As such, this tool has potential to aid in the [reproducible generation of figur
 
 GIXStapose is made possible by open-source packages, including the high-quality rendering of the [Fresnel ray-tracer](https://fresnel.readthedocs.io/en/stable/), the ability to read in multiple chemical file formats of [MBuild](https://mosdef.org/mbuild/index.html), and numpy's fast Fourier implementations used in [interactive diffraction analysis](https://bitbucket.org/cmelab/cme_utils/src/master/cme_utils/analyze/diffractometer.py), and by funding from the National Science Foundation (#1835593)
 
-![A screen capture of GIXStapose in action](screenshot.gif)
+![A screen capture of GIXStapose in action](gixstapose/data/screenshot.gif)
 
 To install:
 1. Create and activate environment
