@@ -45,7 +45,10 @@ class ApplicationWindow(QMainWindow):
         self.scene = visualize(compound)
 
         self.d = Diffractometer()
-        box = compound.boundingbox.maxs - compound.boundingbox.mins
+        try:
+            box = compound.box.lengths
+        except AttributeError:
+            box = compound.boundingbox.lengths
         self.d.load(compound.xyz, box)
 
     def initUI(self):
@@ -209,13 +212,19 @@ class ApplicationWindow(QMainWindow):
         self.repaint()
 
     def move_camera(self, pos):
-        camera = fresnel.camera.orthographic(
-                position=pos, look_at=(0,0,0), up=(0,0,1), height=1.5
-                )
-        self.view.scene.camera = camera
+        self.view.scene.camera = camera_from_pos(pos)
         #self.repaint()
         self.view.start_rendering()
         self.view.update()
+
+def camera_from_pos(pos):
+    camera = fresnel.camera.orthographic(
+            position=pos,
+            look_at=(0,0,0),
+            up=(0,0,1),
+            height=1.5
+            )
+    return camera
 
 def main():
     parser = argparse.ArgumentParser(description="Provide a chemical input file")
