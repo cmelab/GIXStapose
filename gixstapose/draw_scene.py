@@ -152,7 +152,7 @@ def mb_to_freud_box(box):
 
     Parameters
     ----------
-    box : mbuild.box.Box()
+    box : mbuild.Box()
 
     Returns
     -------
