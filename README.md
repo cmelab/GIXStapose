@@ -9,6 +9,7 @@ GIXStapose is made possible by open-source packages, including the high-quality 
 
 ![A screen capture of GIXStapose in action](gixstapose/data/screenshot.gif)
 
+### Installation
 To install GIXStapose you will need the conda package manager (we recommend [Miniconda](https://docs.conda.io/en/latest/miniconda.html))
 1. Clone this repo
 ```
@@ -25,6 +26,7 @@ conda activate gixstapose
 pip install -e .
 ```
 
+### Usage
 To run a simple cubic example:
 ```
 gixstapose
@@ -34,7 +36,7 @@ to load an input file format supported by [MDTraj](http://mdtraj.org/1.8.0/load_
 gixstapose -i INPUTFILE
 ```
 
-Related citations:
+#### Related citations:
 
 [Jones, M. L., & Jankowski, E. (2017). Computationally connecting organic photovoltaic performance to atomistic arrangements and bulk morphology. Molecular Simulation, 43(10–11), 1–18. https://doi.org/10.1080/08927022.2017.1296958](http://dx.doi.org/10.1080/08927022.2017.1296958)
 
