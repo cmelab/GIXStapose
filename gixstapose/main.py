@@ -16,9 +16,9 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
-import interact
-from diffractometer import Diffractometer, camera_to_rot
-from draw_scene import visualize, from_gsd
+from gixstapose import interact
+from gixstapose.diffractometer import Diffractometer, camera_to_rot
+from gixstapose.draw_scene import visualize, from_gsd
 
 
 class ApplicationWindow(QMainWindow):
@@ -219,8 +219,7 @@ class ApplicationWindow(QMainWindow):
         self.view.start_rendering()
         self.view.update()
 
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Provide a chemical input file")
     parser.add_argument("-i", "--input", type=str,
         help="an input file, accepted types: mol2, pdb, xyz, gsd")
@@ -234,3 +233,7 @@ if __name__ == "__main__":
     app.show()
 
     qapp.exec_()
+
+
+if __name__ == "__main__":
+    main()
