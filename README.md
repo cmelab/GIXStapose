@@ -9,20 +9,29 @@ GIXStapose is made possible by open-source packages, including the high-quality 
 
 ![A screen capture of GIXStapose in action](gixstapose/data/screenshot.gif)
 
-To install:
-1. Create and activate environment
+To install GIXStapose you will need the conda package manager (we recommend [Miniconda](https://docs.conda.io/en/latest/miniconda.html))
+1. Using conda, create and activate your environment
 ```
 conda env create -f environment.yml;
 conda activate gixstapose
 ```
+2. Clone this repo
+```
+git clone git@github.com:cmelab/GIXStapose.git;
+cd GIXStapose
+```
+3. Install this package with pip
+```
+pip install -e .
+```
 
 To run a simple cubic example:
 ```
-python gixstapose/main.py
+gixstapose
 ```
 to load an input file format supported by [MDTraj](http://mdtraj.org/1.8.0/load_functions.html) (e.g., pdb, xml, dcd, xyz, hoomdxml) or a [gsd file](https://gsd.readthedocs.io/en/stable/):
 ```
-python gixstapose/main.py -i INPUTFILE
+gixstapose -i INPUTFILE
 ```
 
 Related citations:
