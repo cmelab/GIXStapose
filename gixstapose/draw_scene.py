@@ -89,7 +89,10 @@ def from_gsd(gsdfile, frame=-1, coords_only=False, scale=1.0):
 
     # Add particles
     comp = mb.Compound()
-    comp.box = snap.configuration.box[:3] * scale
+    comp.box = mb.Box(
+            lengths=snap.configuration.box[:3] * scale,
+            angles=snap.configuration.box[3:]
+            )
     for i in range(n_atoms):
         name = snap.particles.types[snap.particles.typeid[i]]
         xyz = snap.particles.position[i] * scale
