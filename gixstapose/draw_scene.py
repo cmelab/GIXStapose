@@ -60,14 +60,14 @@ bsu_colors = [
 # Made space to add more later
 radii_dict = {"H": 0.05, "default": 0.06}
 
-def compound_load(inputfile, frame):
+def compound_load(inputfile, frame=-1):
     """
     Loads an input file into an mbuild.Compound
 
     Parameters
     ----------
     inputfile: str, path to input file
-    frame: int, if inputfile is a trajectory, which frame to load
+    frame: int, if inputfile is a trajectory, which frame to load. Supports negative indexing (default -1)
 
     Returns
     -------
