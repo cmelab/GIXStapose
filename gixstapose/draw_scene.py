@@ -1,5 +1,4 @@
 import random
-import warnings
 
 import matplotlib.cm
 import numpy as np
@@ -274,42 +273,3 @@ def visualize(comp, color="cpk", scale=1.0, box=None):
         # Create box in fresnel
         fresnel.geometry.Box(scene, freud_box, box_radius=0.008 * scale)
     return scene
-
-
-class Methane(mb.Compound):
-    def __init__(self):
-        super(Methane, self).__init__()
-        carbon = mb.Particle(name="C")
-        self.add(carbon, label="C[$]")
-
-        hydrogen = mb.Particle(name="H", pos=[0.1, 0, -0.07])
-        self.add(hydrogen, label="HC[$]")
-
-        self.add_bond((self[0], self["HC"][0]))
-
-        self.add(mb.Particle(name="H", pos=[-0.1, 0, -0.07]), label="HC[$]")
-        self.add(mb.Particle(name="H", pos=[0, 0.1, 0.07]), label="HC[$]")
-        self.add(mb.Particle(name="H", pos=[0, -0.1, 0.07]), label="HC[$]")
-
-        self.add_bond((self[0], self["HC"][1]))
-        self.add_bond((self[0], self["HC"][2]))
-        self.add_bond((self[0], self["HC"][3]))
-
-
-class CG(mb.Compound):
-    def __init__(self):
-        super(CG, self).__init__()
-        np.random.seed(42)
-        for i in range(ord("A"), ord("Z") + 1):
-            random.seed(i)
-            N = random.randint(1, 4)
-            for n in range(N):
-                self.add(
-                    mb.Particle(name=f"_{chr(i)}", pos=np.random.random(3) * 2 - 1)
-                )
-
-        for i in range(self.n_particles - 1):
-            for j in range(i + 1, self.n_particles):
-                dist = distance(self.xyz[i], self.xyz[j])
-                if dist < 0.3:
-                    self.add_bond((self[i], self[j]))
