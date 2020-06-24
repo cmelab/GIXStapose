@@ -10,15 +10,15 @@ GIXStapose is made possible by open-source packages, including the high-quality 
 ![A screen capture of GIXStapose in action](gixstapose/data/screenshot.gif)
 
 To install GIXStapose you will need the conda package manager (we recommend [Miniconda](https://docs.conda.io/en/latest/miniconda.html))
-1. Using conda, create and activate your environment
-```
-conda env create -f environment.yml;
-conda activate gixstapose
-```
-2. Clone this repo
+1. Clone this repo
 ```
 git clone git@github.com:cmelab/GIXStapose.git;
 cd GIXStapose
+```
+2. Using conda, create and activate your environment
+```
+conda env create -f environment.yml;
+conda activate gixstapose
 ```
 3. Install this package with pip
 ```
