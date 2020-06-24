@@ -60,6 +60,25 @@ bsu_colors = [
 # Made space to add more later
 radii_dict = {"H": 0.05, "default": 0.06}
 
+def compound_load(inputfile, frame):
+    """
+    Loads an input file into an mbuild.Compound
+
+    Parameters
+    ----------
+    inputfile: str, path to input file
+    frame: int, if inputfile is a trajectory, which frame to load
+
+    Returns
+    -------
+    mbuild.Compound
+    """
+    try:
+        compound = from_gsd(inputfile, frame=frame)
+    except RuntimeError:
+        compound = mb.load(inputfile)
+    return compound
+
 
 def from_gsd(gsdfile, frame=-1, coords_only=False, scale=1.0):
     """

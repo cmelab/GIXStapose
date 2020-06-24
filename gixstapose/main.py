@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 from gixstapose import interact
 from gixstapose.diffractometer import Diffractometer, camera_to_rot
-from gixstapose.draw_scene import visualize, from_gsd
+from gixstapose.draw_scene import visualize, compound_load
 
 
 class ApplicationWindow(QMainWindow):
@@ -39,11 +39,7 @@ class ApplicationWindow(QMainWindow):
         self.initUI()
 
     def init_diffractometer(self, inputfile, frame):
-        try:
-            compound = from_gsd(inputfile, frame=frame)
-        except RuntimeError:
-            compound = mb.load(inputfile)
-
+        compound = compound_load(inputfile, frame)
         self.scene = visualize(compound)
 
         self.d = Diffractometer()
