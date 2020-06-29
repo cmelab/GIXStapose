@@ -220,12 +220,23 @@ class ApplicationWindow(QMainWindow):
         self.view.update()
 
 def camera_from_pos(pos):
-    camera = fresnel.camera.orthographic(
-            position=pos,
-            look_at=(0,0,0),
-            up=(0,0,1),
-            height=1.5
-            )
+    try:
+        camera = fresnel.camera.orthographic(
+                position=pos,
+                look_at=(0,0,0),
+                up=(0,0,1),
+                height=1.5
+                )
+    except AttributeError:
+        # Recent changes to fresnel have made different cameras
+        # into classes
+        camera = fresnel.camera.Orthographic(
+                position=pos,
+                look_at=(0,0,0),
+                up=(0,0,1),
+                height=1.5
+                )
+
     return camera
 
 def main():
