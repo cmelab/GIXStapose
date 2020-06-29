@@ -43,6 +43,8 @@ class ApplicationWindow(QMainWindow):
     def init_diffractometer(self, inputfile, frame):
         compound = compound_load(inputfile, frame)
         self.scene = visualize(compound)
+        mode = self.scene.device.mode
+        self.title = f"GIXStapose ({mode} mode)"
 
         self.d = Diffractometer()
         try:
