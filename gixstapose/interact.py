@@ -11,7 +11,7 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 from PySide2 import QtCore
 from PySide2.QtCore import Signal, QObject
-import numpy
+import numpy as np
 import time
 import collections
 import math
@@ -31,7 +31,10 @@ def q_conjugate(q):
     return (w, -x, -y, -z)
 
 def qv_mult(q1, v1):
-    q2 = (0.0,) + v1
+    if type(v1) is type(np.array([])):
+        q2 = np.append(np.array([0]), v1)
+    else:
+        q2 = (0.0,) + v1
     return q_mult(q_mult(q1, q2), q_conjugate(q1))[1:]
 
 def axisangle_to_q(v, theta):
