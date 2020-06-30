@@ -33,13 +33,11 @@ To run a simple cubic example:
 ```
 gixstapose
 ```
-to load an input file format supported by [MDTraj](http://mdtraj.org/1.8.0/load_functions.html) (e.g., pdb, xml, dcd, xyz, hoomdxml) or a [gsd file](https://gsd.readthedocs.io/en/stable/):
+To load an input file format supported by [MDTraj](http://mdtraj.org/1.8.0/load_functions.html) (e.g., pdb, xml, dcd, xyz, hoomdxml) or a [gsd file](https://gsd.readthedocs.io/en/stable/):
 ```
 gixstapose -i INPUTFILE
 ```
-
-#### Related citations:
-
-[Jones, M. L., & Jankowski, E. (2017). Computationally connecting organic photovoltaic performance to atomistic arrangements and bulk morphology. Molecular Simulation, 43(10–11), 1–18. https://doi.org/10.1080/08927022.2017.1296958](http://dx.doi.org/10.1080/08927022.2017.1296958)
-
-[Miller, E. D., Jones, M. L., Henry, M. M., Chery, P., Miller, K., & Jankowski, E. (2018). Optimization and Validation of Efficient Models for Predicting Polythiophene Self-Assembly. Polymers, 10(12), 1305. https://doi.org/10.3390/polym10121305](https://doi.org/10.3390/polym10121305)
+To see an example of how to use the gixstapose library in your simulation workflow for generating reproducible figures and scattering patterns:
+```
+jupyter notebook Figure_Example.ipynb
+```
