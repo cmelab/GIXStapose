@@ -1,7 +1,7 @@
 import fresnel
 import mbuild as mb
 
-from gixstapose.draw_scene import visualize
+from gixstapose.draw_scene import create_scene
 
 class Methane(mb.Compound):
     def __init__(self):
@@ -24,6 +24,6 @@ class Methane(mb.Compound):
 
 def test_visualise():
     methane = Methane()
-    scene = visualize(methane)
+    scene = create_scene(methane)
     assert type(scene) is type(fresnel.Scene())
 
