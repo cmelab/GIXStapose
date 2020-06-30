@@ -1,4 +1,4 @@
-![CI](https://github.com/cmelab/GIXStapose/workflows/CI/badge.svg) [![codecov](https://codecov.io/gh/cmelab/GIXStapose/branch/master/graph/badge.svg)](https://codecov.io/gh/cmelab/GIXStapose)
+[![CI](https://github.com/cmelab/GIXStapose/workflows/CI/badge.svg)](https://github.com/cmelab/GIXStapose/actions) [![codecov](https://codecov.io/gh/cmelab/GIXStapose/branch/master/graph/badge.svg)](https://codecov.io/gh/cmelab/GIXStapose)
 
 
 # GIXStapose
