@@ -18,8 +18,8 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 from gixstapose import interact
-from gixstapose.diffractometer import Diffractometer, camera_to_rot
-from gixstapose.draw_scene import visualize, compound_load
+from gixstapose.diffractometer import Diffractometer
+from gixstapose.draw_scene import create_scene, compound_load
 
 
 class ApplicationWindow(QMainWindow):
@@ -42,16 +42,12 @@ class ApplicationWindow(QMainWindow):
 
     def init_diffractometer(self, inputfile, frame):
         compound = compound_load(inputfile, frame)
-        self.scene = visualize(compound)
+        self.scene = create_scene(compound)
         mode = self.scene.device.mode
         self.title = f"GIXStapose ({mode} mode)"
 
         self.d = Diffractometer()
-        try:
-            box = compound.box.lengths
-        except AttributeError:
-            box = compound.boundingbox.lengths
-        self.d.load(compound.xyz, box)
+        self.d.load_compound(compound)
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -61,8 +57,10 @@ class ApplicationWindow(QMainWindow):
         filemenu = menubar.addMenu("File")
         render = QAction("Render Scene", self)
         export = QAction("Export Diffraction Pattern", self)
+        print_camera = QAction("Print Camera", self)
         filemenu.addAction(render)
         filemenu.addAction(export)
+        filemenu.addAction(print_camera)
         filemenu.triggered[QAction].connect(self.processtrigger)
 
         self.main = QWidget()
@@ -169,6 +167,10 @@ class ApplicationWindow(QMainWindow):
             print(f"Diffraction pattern saved as {filename}")
             self.diffract_counter += 1
 
+        elif q.text() == "Print Camera":
+            print("Current camera is:\n")
+            print(self.camera_text(self.view.scene.camera))
+
     def change_zoom(self):
         self.d.zoom = self.zooms[self.zoomslider.value()]
         self.plot_diffract(self.view.scene.camera)
@@ -179,19 +181,14 @@ class ApplicationWindow(QMainWindow):
         """
         pos = camera.position
         look = camera.look_at
+        up = camera.up
         text = "".join(
             [
                 "Camera\n",
-                "   position : {0:.3f} {1:.3f} {2:.3f}\n".format(
-                    pos[0], pos[1], pos[2]
-                ),
-                "   look at :  {0:.3f} {1:.3f} {2:.3f}\n".format(
-                    look[0], look[1], look[2]
-                ),
-                "   up :       {0:.3f} {1:.3f} {2:.3f}\n".format(
-                    camera.up[0], camera.up[1], camera.up[2]
-                ),
-                "   height :   {0:.3f}".format(camera.height),
+                f"   position = [{pos[0]:.3f}, {pos[1]:.3f}, {pos[2]:.3f}],\n",
+                f"   look_at =  [{look[0]:.3f}, {look[1]:.3f}, {look[2]:.3f}],\n",
+                f"   up =       [{up[0]:.3f}, {up[1]:.3f}, {up[2]:.3f}],\n",
+                f"   height =   {camera.height:.3f}",
             ]
         )
         return text
@@ -205,10 +202,9 @@ class ApplicationWindow(QMainWindow):
     def plot_diffract(self, camera):
         self.diffract_ax.clear()
         self.diffract_ax.axis("off")
-        rot = camera_to_rot(camera)
 
         # diffraction pattern
-        self.dp = self.d.diffract(rot.T)
+        self.dp = self.d.diffract_from_camera(camera)
         self.diffract_ax.imshow(self.dp, cmap="jet")
         self.diffract_ax.figure.canvas.draw()
         self.repaint()
