@@ -1,6 +1,7 @@
 import random
 
 import matplotlib.cm
+from matplotlib import colors as mplcolors
 import numpy as np
 import gsd
 import gsd.pygsd
@@ -178,14 +179,16 @@ def mb_to_freud_box(box):
     return freud.box.Box(*box_list)
 
 
-def visualize(comp, color="cpk", scale=1.0, box=None):
+def create_scene(comp, color="cpk", scale=1.0, box=None):
     """
-    Visualize an mbuild Compound using fresnel.
+    Create a fresnel.Scene object from an  mbuild Compound. Adds
+    geometries for particles, bonds, and box (or boundingbox).
 
     Parameters
     ----------
     comp : (mbuild.Compound), compound to visualize
-    color : ("cpk", "bsu", or the name of a matplotlib colormap), color scheme to use (default "cpk")
+    color : ("cpk", "bsu", the name of a matplotlib colormap, or a custom dictionary),
+            color scheme to use (default "cpk")
     scale : (float), scaling factor for the particle, bond, and box radii (default 1.0)
     box : (mb.Box), box object for the structure. If no box is provided,
         comp.boundingbox is used
@@ -205,7 +208,19 @@ def visualize(comp, color="cpk", scale=1.0, box=None):
         all_bonds = np.stack([np.stack((i[0].pos, i[1].pos)) for i in comp.bonds()])
 
     color_array = np.empty((N, 3), dtype="float64")
-    if color == "cpk":
+    if type(color) is dict:
+        # Populate the color_array with colors based on particle name
+        # -- if name is not defined in the dictionary, try using the cpk dictionary
+        for i, n in enumerate(particle_names):
+            try:
+                ncolor = color[n]
+                color_array[i, :] = fresnel.color.linear(mplcolors.to_rgba(ncolor))
+            except KeyError:
+                try:
+                    color_array[i, :] = cpk_colors[n]
+                except KeyError:
+                    color_array[i, :] = cpk_colors["default"]
+    elif color == "cpk":
         # Populate the color_array with colors based on particle name
         # -- if name is not defined in the dictionary, use pink (the default)
         for i, n in enumerate(particle_names):
