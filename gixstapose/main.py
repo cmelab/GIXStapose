@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import fresnel
+from fresnel import interact
 import mbuild as mb
 import numpy as np
 import PIL
@@ -17,7 +18,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
-from gixstapose import interact
 from gixstapose.diffractometer import Diffractometer
 from gixstapose.draw_scene import create_scene, compound_load
 
@@ -83,7 +83,8 @@ class ApplicationWindow(QMainWindow):
 
         # Add the SceneView widget
         self.view = interact.SceneView(self.scene)
-        self.view.c.update_camera.connect(self.update_camera)
+        self.view.rendering.connect(self.update_camera)
+        #self.view.c.update_camera.connect(self.update_camera)
         toplayout.addWidget(self.view, 0, 0)
 
         # Add the diffraction widget
@@ -243,7 +244,9 @@ def main():
         help="if trajectory file is given, which frame to diffract (default -1 or last frame)")
     args = parser.parse_args()
 
-    qapp = QApplication([])
+    qapp = QApplication.instance()
+    if qapp == None:
+        qapp = QApplication([])
 
     app = ApplicationWindow(args.input, args.frame)
     app.show()

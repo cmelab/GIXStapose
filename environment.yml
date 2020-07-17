@@ -1,4 +1,4 @@
-name: gixstapose
+name: gixstapose-dev
 channels:
   - conda-forge
   - mosdef
@@ -10,7 +10,6 @@ dependencies:
   - numpy
   - pillow
   - freud
-  - fresnel
   - gsd
   - mbuild
   - openbabel
