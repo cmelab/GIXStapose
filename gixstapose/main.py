@@ -213,7 +213,7 @@ class ApplicationWindow(QMainWindow):
     def move_camera(self, pos):
         self.view.scene.camera = camera_from_pos(pos)
         #self.repaint()
-        self.view.start_rendering()
+        self.view._start_rendering()
         self.view.update()
 
 def camera_from_pos(pos):
