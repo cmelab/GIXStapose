@@ -11,6 +11,8 @@ on:
     paths:
       - 'gixstapose/*.py'
       - 'gixstapose/tests/*'
+  # Allows workflow to be manually triggered
+  workflow_dispatch:
 
 jobs:
   pytest:
