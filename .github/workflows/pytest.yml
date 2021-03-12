@@ -1,0 +1,31 @@
+name: pytest
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'gixstapose/*.py'
+      - 'gixstapose/tests/*'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'gixstapose/*.py'
+      - 'gixstapose/tests/*'
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    container: 
+        image: cmelab/gixstapose:latest
+
+    steps:
+    - uses: actions/checkout@v2
+ 
+    - name: Run pytest with coverage report
+      run: python -m pytest --cov=./ --cov-report=xml -v
+          
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
