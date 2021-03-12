@@ -1,0 +1,8 @@
+FROM cmelab/gpuconda:latest
+
+# Create the environment
+COPY environment.yml ./
+
+# Install in base environment
+RUN conda env update -n base -f environment.yml && \
+    conda clean --all --yes -f 
