@@ -8,7 +8,6 @@ import gsd.pygsd
 import gsd.hoomd
 
 import fresnel
-import freud
 import mbuild as mb
 import PIL
 
@@ -67,8 +66,11 @@ def compound_load(inputfile, frame=-1):
 
     Parameters
     ----------
-    inputfile: str, path to input file
-    frame: int, if inputfile is a trajectory, which frame to load. Supports negative indexing (default -1)
+    inputfile: str,
+               path to input file
+    frame: int,
+           if inputfile is a trajectory, which frame to load. Supports
+           negative indexing (default -1)
 
     Returns
     -------
@@ -144,9 +146,9 @@ def distance(pos1, pos2):
     return np.linalg.norm(pos1 - pos2)
 
 
-def mb_to_freud_box(box):
+def mb_box_convert(box):
     """
-    Convert an mbuild box object to a freud box object
+    Convert an mbuild box object to hoomd/gsd style: [Lx, Ly, Lz, xy, xz, yz]
     These sites are helpful as reference:
     http://gisaxs.com/index.php/Unit_cell
     https://hoomd-blue.readthedocs.io/en/stable/box.html
@@ -157,26 +159,19 @@ def mb_to_freud_box(box):
 
     Returns
     -------
-    freud.box.Box()
+    numpy array
     """
-    Lx = box.lengths[0]
-    Ly = box.lengths[1]
-    Lz = box.lengths[2]
-    alpha = box.angles[0]
-    beta = box.angles[1]
-    gamma = box.angles[2]
+    Lx, Ly, Lz = box.lengths
+    alpha, beta, gamma  = np.deg2rad(box.angles)
 
-    frac = (
-        np.cos(np.radians(alpha)) - np.cos(np.radians(beta)) * np.cos(np.radians(gamma))
-    ) / np.sin(np.radians(gamma))
-    c = np.sqrt(1 - np.cos(np.radians(beta)) ** 2 - frac ** 2)
+    frac = np.cos(alpha) - np.cos(beta) * np.cos(gamma) / np.sin(gamma)
+    c = np.sqrt(1 - np.cos(beta) ** 2 - frac ** 2)
 
-    xy = np.cos(np.radians(gamma)) / np.sin(np.radians(gamma))
+    xy = np.cos(gamma) / np.sin(gamma)
     xz = frac / c
-    yz = np.cos(np.radians(beta)) / c
+    yz = np.cos(beta) / c
 
-    box_list = list(box.maxs) + [xy, yz, xz]
-    return freud.box.Box(*box_list)
+    return np.array([Lx, Ly, Lz, xy, xz, yz])
 
 
 def create_scene(comp, color="cpk", scale=1.0, box=None):
@@ -186,12 +181,16 @@ def create_scene(comp, color="cpk", scale=1.0, box=None):
 
     Parameters
     ----------
-    comp : (mbuild.Compound), compound to visualize
-    color : ("cpk", "bsu", the name of a matplotlib colormap, or a custom dictionary),
+    comp : (mbuild.Compound),
+           compound to visualize
+    color : ("cpk", "bsu", the name of a matplotlib colormap,
+            or a custom dictionary),
             color scheme to use (default "cpk")
-    scale : (float), scaling factor for the particle, bond, and box radii (default 1.0)
-    box : (mb.Box), box object for the structure. If no box is provided,
-        comp.boundingbox is used
+    scale : (float),
+            scaling factor for the particle, bond, and box radii (default 1.0)
+    box : (mb.Box),
+          box object for the structure. If no box is provided,
+          comp.boundingbox is used (default None)
 
     Returns
     -------
@@ -205,16 +204,20 @@ def create_scene(comp, color="cpk", scale=1.0, box=None):
     N_bonds = comp.n_bonds
     if N_bonds > 0:
         # all_bonds.shape is (nbond, 2 ends, xyz)
-        all_bonds = np.stack([np.stack((i[0].pos, i[1].pos)) for i in comp.bonds()])
+        all_bonds = np.stack([
+            np.stack((i[0].pos, i[1].pos)) for i in comp.bonds()
+            ])
 
     color_array = np.empty((N, 3), dtype="float64")
     if type(color) is dict:
         # Populate the color_array with colors based on particle name
-        # -- if name is not defined in the dictionary, try using the cpk dictionary
+        # if name is not defined in the dictionary, try using the cpk dictionary
         for i, n in enumerate(particle_names):
             try:
                 ncolor = color[n]
-                color_array[i, :] = fresnel.color.linear(mplcolors.to_rgba(ncolor))
+                color_array[i, :] = fresnel.color.linear(
+                        mplcolors.to_rgba(ncolor)
+                        )
             except KeyError:
                 try:
                     color_array[i, :] = cpk_colors[n]
@@ -230,11 +233,15 @@ def create_scene(comp, color="cpk", scale=1.0, box=None):
                 color_array[i, :] = cpk_colors["default"]
     elif color == "bsu":
         # Populate the color array with the brand standard bsu colors
-        # https://www.boisestate.edu/communicationsandmarketing/brand-standards/colors/
-        # if there are more unique particle names than colors, colors will be reused
+        # https://www.boisestate.edu/communicationsandmarketing/
+        # brand-standards/colors/
+        # if there are more unique particle names than colors,
+        # colors will be reused
         unique_names = list(set(particle_names))
         for i, n in enumerate(particle_names):
-            color_array[i, :] = bsu_colors[uniq_atoms.index(n) % len(bsu_colors)]
+            color_array[i, :] = bsu_colors[
+                    uniq_atoms.index(n) % len(bsu_colors)
+                    ]
     else:
         # Populate the color_array with colors based on particle name
         # choose colors evenly distributed through a matplotlib colormap
@@ -242,11 +249,12 @@ def create_scene(comp, color="cpk", scale=1.0, box=None):
             cmap = matplotlib.cm.get_cmap(name=color)
         except ValueError:
             print(
-                "The 'color' argument takes either 'cpk', 'bsu', or the name of a matplotlib colormap."
+                "The 'color' argument takes either 'cpk', 'bsu', or the name",
+                " of a matplotlib colormap."
             )
             raise
         mapper = matplotlib.cm.ScalarMappable(
-            norm=matplotlib.colors.Normalize(vmin=0, vmax=1, clip=True), cmap=cmap
+            norm=mplcolors.Normalize(vmin=0, vmax=1, clip=True), cmap=cmap
         )
         particle_types = list(set(particle_names))
         N_types = len(particle_types)
@@ -254,7 +262,9 @@ def create_scene(comp, color="cpk", scale=1.0, box=None):
         # Color by typeid
         type_ids = np.array([particle_types.index(i) for i in particle_names])
         for i in range(N_types):
-            color_array[type_ids == i] = fresnel.color.linear(mapper.to_rgba(v)[i])
+            color_array[type_ids == i] = fresnel.color.linear(
+                    mapper.to_rgba(v)[i]
+                    )
 
     # Make an array of the radii based on particle name
     # -- if name is not defined in the dictionary, use default
@@ -294,16 +304,18 @@ def create_scene(comp, color="cpk", scale=1.0, box=None):
         bonds.points[:] = all_bonds
 
         bonds.color[:] = np.stack(
-            [fresnel.color.linear(bond_colors), fresnel.color.linear(bond_colors)], axis=1
+            [fresnel.color.linear(bond_colors),
+             fresnel.color.linear(bond_colors)
+             ], axis=1
         )
         bonds.radius[:] = [0.03 * scale] * N_bonds
 
     if box:
         # Use comp.box, unless it does not exist, then use comp.boundingbox
         try:
-            freud_box = mb_to_freud_box(box)
+            new_box = mb_box_convert(box)
         except AttributeError:
-            freud_box = mb_to_freud_box(comp.boundingbox)
+            new_box = mb_box_convert(comp.boundingbox)
         # Create box in fresnel
-        fresnel.geometry.Box(scene, freud_box, box_radius=0.008 * scale)
+        fresnel.geometry.Box(scene, new_box, box_radius=0.008 * scale)
     return scene
