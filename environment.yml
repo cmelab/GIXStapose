@@ -1,19 +1,16 @@
-name: gixstapose-dev
+name: gixstapose
 channels:
   - conda-forge
-  - mosdef
-  - omnia
 dependencies:
-  - python=3.7
-  - pip
-  - matplotlib
-  - numpy
-  - pillow
-  - freud
+  - fresnel=0.13
   - gsd
+  - matplotlib
   - mbuild
+  - numpy
   - openbabel
-  - py3Dmol
+  - pillow
+  - pip
   - pyside2
+  - python
   - pip:
     - git+https://bitbucket.org/cmelab/cme_utils
