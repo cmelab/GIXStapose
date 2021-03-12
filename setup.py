@@ -1,7 +1,17 @@
 from setuptools import setup
 
+VERSION = None
+
+# Load the package's __version__.py module as a dictionary.
+about = {}
+if not VERSION:
+    with open(os.path.join(here, NAME, "__version__.py")) as f:
+        exec(f.read(), about)
+else:
+    about["__version__"] = VERSION
+
 setup(name='gixstapose',
-      version='0.0',
+      version=about["__version__"],
       description='An interactive structure viewer alongside its diffraction pattern',
       url='https://github.com/cmelab/GIXStapose',
       author='Jenny Fothergill',
