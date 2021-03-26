@@ -13,7 +13,10 @@ GIXStapose is made possible by open-source packages, including the high-quality 
 
 ![A screen capture of GIXStapose in action](gixstapose/data/screenshot.gif)
 
+### Examples
+
 Click the binder link to see an example using the gixstapose library for generating reproducible figures and scattering patterns:
+
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cmelab/gixstapose/master?urlpath=tree/examples/Figure_Example.ipynb)
 
 ### Updates
