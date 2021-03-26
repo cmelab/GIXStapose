@@ -318,4 +318,9 @@ def create_scene(comp, color="cpk", scale=1.0, box=None):
             new_box = mb_box_convert(comp.boundingbox)
         # Create box in fresnel
         fresnel.geometry.Box(scene, new_box, box_radius=0.008 * scale)
+
+    # Set the initial camera position
+    max_dist = np.max(comp.xyz) - np.min(comp.xyz)
+    scene.camera.height = 1.5 * max_dist
+    scene.camera.position = [max_dist, max_dist, max_dist]
     return scene
