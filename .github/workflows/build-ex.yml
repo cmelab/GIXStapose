@@ -7,11 +7,6 @@ on:
     paths:
         - 'containers/dockerfile-ex'
         - 'examples/environment-ex.yml'
-  pull_request:
-    branches: [ master ]
-    paths:
-        - 'containers/dockerfile-ex'
-        - 'examples/environment-ex.yml'
   # Allows workflow to be manually triggered
   workflow_dispatch:
 
