@@ -1,14 +1,11 @@
 from setuptools import setup
 
-VERSION = None
 
 # Load the package's __version__.py module as a dictionary.
+here = os.path.abspath(os.path.dirname(__file__))
 about = {}
-if not VERSION:
-    with open(os.path.join(here, NAME, "__version__.py")) as f:
-        exec(f.read(), about)
-else:
-    about["__version__"] = VERSION
+with open(os.path.join(here, NAME, "__version__.py")) as f:
+    exec(f.read(), about)
 
 setup(name='gixstapose',
       version=about["__version__"],
