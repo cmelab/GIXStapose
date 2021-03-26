@@ -14,7 +14,7 @@ GIXStapose is made possible by open-source packages, including the high-quality 
 ![A screen capture of GIXStapose in action](gixstapose/data/screenshot.gif)
 
 Click the binder link to see an example using the gixstapose library for generating reproducible figures and scattering patterns:
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cmelab/gixstapose/master?filepath=examples)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cmelab/gixstapose/master?filepath=examples/Figure_Example.ipynb)
 
 ### Updates
 - Jul 31, 2020: GIXStapose's diffraction code has been added as a module in [Freud](https://freud.readthedocs.io/en/v2.4.1/modules/diffraction.html)!
