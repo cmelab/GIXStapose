@@ -1,4 +1,5 @@
 from setuptools import setup
+import os
 
 
 # Load the package's __version__.py module as a dictionary.
