@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 
 import fresnel
-from fresnel import interact
 import mbuild as mb
 import numpy as np
 import PIL
@@ -77,6 +76,8 @@ class ApplicationWindow(QMainWindow):
         self.show()
 
     def createGridLayout(self):
+        from fresnel import interact
+
         # Top grid with sceneview and diffraction pattern
         self.tophorizontalGroupBox = QGroupBox()
         toplayout = QGridLayout()
