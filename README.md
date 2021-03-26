@@ -14,7 +14,7 @@ GIXStapose is made possible by open-source packages, including the high-quality 
 ![A screen capture of GIXStapose in action](gixstapose/data/screenshot.gif)
 
 ### Updates
-- GIXStapose's diffraction code has been added as a module in [Freud](https://freud.readthedocs.io/en/stable/modules/diffraction.html)!
+- Jul 31, 2020: GIXStapose's diffraction code has been added as a module in [Freud](https://freud.readthedocs.io/en/v2.4.1/modules/diffraction.html)!
 
 ### Installation
 To install GIXStapose you will need the conda package manager (we recommend [Miniconda](https://docs.conda.io/en/latest/miniconda.html))
