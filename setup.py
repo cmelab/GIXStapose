@@ -1,7 +1,16 @@
 from setuptools import setup
+import os
 
-setup(name='gixstapose',
-      version='0.0',
+
+NAME = "gixstapose"
+# Load the package's __version__.py module as a dictionary.
+here = os.path.abspath(os.path.dirname(__file__))
+about = {}
+with open(os.path.join(here, NAME, "__version__.py")) as f:
+    exec(f.read(), about)
+
+setup(name=NAME,
+      version=about["__version__"],
       description='An interactive structure viewer alongside its diffraction pattern',
       url='https://github.com/cmelab/GIXStapose',
       author='Jenny Fothergill',

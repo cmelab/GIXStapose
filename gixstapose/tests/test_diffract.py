@@ -17,9 +17,7 @@ def test_diffract():
     inputfile = path + "/data/sc10.pdb"
     compound = compound_load(inputfile)
     d.load(compound.xyz,compound.boundingbox.lengths)
-    rot = camera_to_rot(
-            camera_from_pos((1,0,0))
-            )
+    rot = camera_to_rot(camera_from_pos((1,0,0)))
     dp = d.diffract(rot.T)
     plt.imsave(temp.name, dp, cmap="jet")
     dpim = Image.open(temp.name)

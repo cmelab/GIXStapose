@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_gpu:
+  build:
     runs-on: ubuntu-latest
 
     steps:
