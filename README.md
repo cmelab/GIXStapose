@@ -13,6 +13,9 @@ GIXStapose is made possible by open-source packages, including the high-quality 
 
 ![A screen capture of GIXStapose in action](gixstapose/data/screenshot.gif)
 
+Click the binder link to see an example using the gixstapose library for generating reproducible figures and scattering patterns:
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cmelab/gixstapose/master?filepath=examples)
+
 ### Updates
 - Jul 31, 2020: GIXStapose's diffraction code has been added as a module in [Freud](https://freud.readthedocs.io/en/v2.4.1/modules/diffraction.html)!
 
@@ -28,10 +31,6 @@ cd GIXStapose
 conda env create -f environment.yml;
 conda activate gixstapose
 ```
-3. Install this package with pip
-```
-pip install -e .
-```
 
 ### Usage
 To run a simple cubic example:
@@ -41,8 +40,4 @@ gixstapose
 To load an input file format supported by [MDTraj](http://mdtraj.org/1.8.0/load_functions.html) (e.g., pdb, xml, dcd, xyz, hoomdxml) or a [gsd file](https://gsd.readthedocs.io/en/stable/):
 ```
 gixstapose -i INPUTFILE
-```
-To see an example of how to use the gixstapose library in your simulation workflow for generating reproducible figures and scattering patterns:
-```
-jupyter notebook Figure_Example.ipynb
 ```
