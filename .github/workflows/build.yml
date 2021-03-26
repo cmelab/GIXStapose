@@ -7,11 +7,6 @@ on:
     paths:
         - 'containers/dockerfile'
         - 'environment.yml'
-  pull_request:
-    branches: [ master ]
-    paths:
-        - 'containers/dockerfile'
-        - 'environment.yml'
   # Allows workflow to be manually triggered
   workflow_dispatch:
 
