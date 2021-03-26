@@ -85,7 +85,6 @@ class ApplicationWindow(QMainWindow):
         # Add the SceneView widget
         self.view = interact.SceneView(self.scene)
         self.view.rendering.connect(self.update_camera)
-        #self.view.c.update_camera.connect(self.update_camera)
         toplayout.addWidget(self.view, 0, 0)
 
         # Add the diffraction widget
@@ -218,22 +217,12 @@ class ApplicationWindow(QMainWindow):
         self.view.update()
 
 def camera_from_pos(pos):
-    try:
-        camera = fresnel.camera.orthographic(
-                position=pos,
-                look_at=(0,0,0),
-                up=(0,0,1),
-                height=1.5
-                )
-    except AttributeError:
-        # Recent changes to fresnel have made different cameras
-        # into classes
-        camera = fresnel.camera.Orthographic(
-                position=pos,
-                look_at=(0,0,0),
-                up=(0,0,1),
-                height=1.5
-                )
+    camera = fresnel.camera.Orthographic(
+            position=pos,
+            look_at=(0,0,0),
+            up=(0,0,1),
+            height=1.5
+            )
 
     return camera
 
