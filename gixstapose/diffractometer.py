@@ -3,10 +3,9 @@ import time
 from os import makedirs
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import interpolate, ndimage
-
-from cme_utils.manip import pbc
-from cme_utils.manip.utilities import rotation_matrix_from_to as cme_rot
+from scipy.interpolate import RectBivariateSpline
+from scipy.ndimage.interpolation import affine_transform
+from scipy.ndimage.fourier import fourier_gaussian
 
 
 class Diffractometer:
@@ -24,7 +23,8 @@ class Diffractometer:
 
         Parameters
         ----------
-        grid_size : int, size of the diffraction grid (default 512)
+        grid_size : int,
+                    size of the diffraction grid (default 512)
         zoom : (default 1)
         peak_width : (default 1)
         length_scale : (default 3.905)
@@ -46,8 +46,10 @@ class Diffractometer:
 
         Parameters
         ----------
-        xyz : np.ndarray (N,3), positions of each particle
-        L : iterable object, lengths of box vectors
+        xyz : np.ndarray (N,3),
+              positions of each particle
+        L : iterable object,
+            lengths of box vectors
         """
         self.box = np.array(
                 [[L[0], 0.0, 0.0],
@@ -55,7 +57,7 @@ class Diffractometer:
                  [0.0, 0.0, L[2]]]
                 )
         self.orig = np.copy(xyz)
-        self.orig, self.image = pbc.shift_pbc(xyz, np.array([L[0], L[1], L[2]]))
+        self.orig, self.image = shift_pbc(xyz, np.array([L[0], L[1], L[2]]))
 
     def load_compound(self, compound):
         """
@@ -65,9 +67,9 @@ class Diffractometer:
 
         Parameters
         ----------
-        compound : mbuild.Compound, compound with box and positions to load
-                   if compound.box does not exist, compound.bounding_box
-                   is used.
+        compound : mbuild.Compound,
+                   compound with box and positions to load if compound.box
+                   does not exist, compound.bounding_box is used.
         """
         try:
             box = compound.box.lengths
@@ -82,12 +84,15 @@ class Diffractometer:
 
         Parameters
         ----------
-        xy : numpy.ndarray (N,2), cartesian coordinates from [-0.5, 0.5) to be mapped to [0, N)
-        N : int, grid size
+        xy : numpy.ndarray (N,2),
+             cartesian coordinates from [-0.5, 0.5) to be mapped to [0, N)
+        N : int,
+            grid size
 
         Returns
         -------
-        numpy.ndarray (N,2), particle bins indices in the x and y directions.
+        numpy.ndarray (N,2),
+            particle bins indices in the x and y directions.
         """
         xy -= np.rint(xy) - 0.5
         xy *= N
@@ -100,12 +105,15 @@ class Diffractometer:
 
         Parameters
         ----------
-        xy : numpy.ndarray (N,2), array of bin indices
-        N : int, grid size
+        xy : numpy.ndarray (N,2),
+             array of bin indices
+        N : int,
+            grid size
 
         Returns
         -------
-        im : numpy.ndarray (N,N), grid of intensities.
+        im : numpy.ndarray (N,N),
+            grid of intensities.
         """
         t = xy.view(np.dtype((np.void, xy.dtype.itemsize * xy.shape[1])))
         _, ids, counts = np.unique(t, return_index=True, return_counts=True)
@@ -123,11 +131,13 @@ class Diffractometer:
 
         Parameters
         ----------
-        rot : numpy.ndarray (3,3), rotation matrix
+        rot : numpy.ndarray (3,3),
+              rotation matrix
 
         Returns
         -------
-        numpy.ndarray (2,2), inverse shear matrix
+        numpy.ndarray (2,2),
+            inverse shear matrix
         """
         s = np.dot(rot.T, self.box)  # rotated box vectors
         xy = np.absolute(s[0, 0] * s[1, 1] - s[0, 1] * s[1, 0])
@@ -164,11 +174,14 @@ class Diffractometer:
 
         Parameters
         ----------
-        p : numpy.ndarray (N,N), diffraction intensity array
+        p : numpy.ndarray (N,N),
+            diffraction intensity array
 
         Returns
         -------
-        numpy.ndarray (N,), indices of particles outside the circle
+        numpy.ndarray (N,),
+            indices of particles outside the circle
+
         note: N != to N in p.shape
         """
         y, x = np.indices(p.shape)
@@ -190,16 +203,18 @@ class Diffractometer:
 
         Parameters
         ----------
-        a : numpy.ndarray (N,N), input array
+        a : numpy.ndarray (N,N),
+            input array
 
         Returns
         -------
-        numpy.ndarray (N,N), scaled array
+        numpy.ndarray (N,N),
+            scaled array
         """
         ny, nx = np.shape(a)
         y = np.array([list(range(ny))])
         x = np.array([list(range(nx))])
-        d = interpolate.RectBivariateSpline(x, y, a, kx=1, ky=1)
+        d = RectBivariateSpline(x, y, a, kx=1, ky=1)
         x = np.linspace(0, nx, self.N)
         y = np.linspace(0, ny, self.N)
         d = d(x, y)
@@ -211,12 +226,15 @@ class Diffractometer:
 
         Parameters
         ----------
-        img : numpy.ndarray (N,N), array of diffraction intensities
-        inv_shear : numpy.ndarray (2,2), inverse shear matrix
+        img : numpy.ndarray (N,N),
+              array of diffraction intensities
+        inv_shear : numpy.ndarray (2,2),
+                    inverse shear matrix
 
         Returns
         -------
-        numpy.ndarray (N,N), sheared array of diffraction intensities
+        numpy.ndarray (N,N),
+            sheared array of diffraction intensities
         """
         roll = img.shape[0] / 2 - 1
         ss = np.max(self.box) * inv_shear
@@ -235,7 +253,7 @@ class Diffractometer:
         A3 = np.linalg.inv(np.dot(A2, A1))
         A4 = A3[0:2, 0:2]
         A5 = A3[0:2, 2]
-        img = ndimage.interpolation.affine_transform(img, A4, A5, mode="constant")
+        img = affine_transform(img, A4, A5, mode="constant")
         return img
 
 
@@ -245,11 +263,14 @@ class Diffractometer:
 
         Parameters
         ----------
-        camera : fresnel.camera, camera which will be used to get the rotation matrix for diffraction
+        camera : fresnel.camera,
+                 camera which will be used to get the rotation matrix for
+                 diffraction
 
         Returns
         -------
-        numpy.ndarray (N,N), diffraction pattern
+        numpy.ndarray (N,N),
+            diffraction pattern
         """
         rot = camera_to_rot(camera)
         return self.diffract(rot.T)
@@ -261,12 +282,15 @@ class Diffractometer:
 
         Parameters
         ----------
-        rot : numpy.ndarray (3, 3), rotation matrix
-        cutout : bool, return diffraction pattern with circle cutout (default True)
+        rot : numpy.ndarray (3, 3),
+              rotation matrix
+        cutout : bool,
+                 return diffraction pattern with circle cutout (default True)
 
         Returns
         -------
-        numpy.ndarray (N,N), diffraction pattern
+        numpy.ndarray (N,N),
+            diffraction pattern
         """
         N = self.N / self.zoom
         inv_shear = self.calc_proj(rot)
@@ -276,7 +300,7 @@ class Diffractometer:
         im = self.bin(xy, N)
 
         dp = np.fft.fft2(im)
-        dp = ndimage.fourier.fourier_gaussian(dp, self.peak_width / self.zoom)
+        dp = fourier_gaussian(dp, self.peak_width / self.zoom)
         dp = np.fft.fftshift(dp)
         dp = np.absolute(dp)
         dp *= dp
@@ -301,11 +325,13 @@ def vector_projection(u, v):
 
     Parameters
     ----------
-    u,v : numpy.ndarray (3,), vectors
+    u,v : numpy.ndarray (3,),
+          vectors
 
     Returns
     -------
-    numpy.ndarray (3,), projection of u onto v
+    numpy.ndarray (3,),
+        projection of u onto v
     """
     return v * np.dot(u, v)/np.linalg.norm(v)
 
@@ -321,11 +347,13 @@ def get_angle(u, v):
 
     Parameters
     ----------
-    u,v : numpy.ndarray (3,), vectors
+    u,v : numpy.ndarray (3,),
+          vectors
 
     Returns
     -------
-    float, angle between u and v in radians
+    float,
+        angle between u and v in radians
     """
     u = unit_vector(u)
     v = unit_vector(v)
@@ -341,11 +369,13 @@ def camera_to_rot(camera):
 
     Parameters
     ----------
-    camera : fresnel.camera, camera in fresnel scene
+    camera : fresnel.camera,
+             camera in fresnel scene
 
     Returns
     -------
-    numpy.ndarray (3,3), rotation matrix
+    numpy.ndarray (3,3),
+        rotation matrix
     """
     pos = camera.position
     look_at = camera.look_at
@@ -369,7 +399,7 @@ def camera_to_rot(camera):
     #beta = get_angle(cam_xz, zvec)
     #gamma = get_angle(cam_xy, xvec)
 
-    return cme_rot(cam_vec, np.array([0,0,1]))
+    return rotation_matrix_from_to(cam_vec, np.array([0,0,1]))
 
 def rot_mat(alpha, beta, gamma):
     """
@@ -377,11 +407,13 @@ def rot_mat(alpha, beta, gamma):
 
     Parameters
     ----------
-    alpha, beta, gamma : float, angles about the x, y, and z axes in radians
+    alpha, beta, gamma : float,
+                         angles about the x, y, and z axes in radians
 
     Returns
     -------
-    numpy.ndarray (3,3), rotation matrix
+    numpy.ndarray (3,3),
+        rotation matrix
     """
     Rx = np.array([
         [1, 0, 0],
@@ -399,3 +431,66 @@ def rot_mat(alpha, beta, gamma):
         [0, 0, 1]
     ])
     return np.dot(np.dot(Rx,Ry),Rz)
+
+
+def shift_pbc(positions, box):
+    """
+    Wraps particle positions into a periodic box.
+
+    Parameters
+    ----------
+    positions : numpy.ndarray
+                particle positions
+    box : numpy.ndarray
+          box lengths, assumes box goes from -L/2 to L/2.
+
+    Returns
+    -------
+    p, numpy.ndarray
+        wrapped coordinate array
+    image, numpy.ndarray
+        image array
+    """
+    p = np.copy(positions)
+    p += box/2.
+    image = np.copy(p)
+    image[:] /= box
+    image = np.array(image, dtype=int)
+    p[:] -= image[:]*box
+    p[p[:, 0] < 0., 0] += box[0]
+    p[p[:, 1] < 0., 1] += box[1]
+    p[p[:, 2] < 0., 2] += box[2]
+    p -= box/2.
+    return p, image
+
+
+def rotation_matrix_from_to(a, b):
+    """
+    Returns rotation matrix R such that norm(b)*dot(R,a)/norm(a) = b.
+
+    Parameters
+    ----------
+    a : numpy.ndarray,
+        A 3-vector
+    b : numpy.ndarray,
+        Another 3-vector
+
+    Returns
+    -------
+    numpy.ndarray
+        The 3x3 rotation matrix that will would rotate a parallel to b.
+    """
+    a1 = a/np.linalg.norm(a)
+    b1 = b/np.linalg.norm(b)
+    theta = np.arccos(np.dot(a1,b1))
+    if theta<1e-6 or np.isnan(theta):
+        return np.identity(3)
+    if np.pi-theta<1e-6: #TODO(Eric): verify correct
+        d = np.array([1.,0,0])
+        x = np.cross(a1,d)
+    else:
+        x = np.cross(a1,b1)
+        x /= np.linalg.norm(x)
+    A = np.array([ [0,-x[2],x[1]], [x[2],0,-x[0]], [-x[1],x[0],0] ])
+    R = np.identity(3) + np.sin(theta)*A + (1.-np.cos(theta))*np.dot(A,A)
+    return R
