@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 
 import fresnel
-import mbuild as mb
 import numpy as np
 import PIL
 # PySide2 must be imported before matplotlib -- isort will switch these
@@ -18,7 +17,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 from gixstapose.diffractometer import Diffractometer
-from gixstapose.draw_scene import create_scene, compound_load
+from gixstapose.draw_scene import get_scene
 
 
 class ApplicationWindow(QMainWindow):
@@ -40,13 +39,13 @@ class ApplicationWindow(QMainWindow):
         self.initUI()
 
     def init_diffractometer(self, inputfile, frame):
-        compound = compound_load(inputfile, frame)
-        self.scene = create_scene(compound)
+        self.scene, info = get_scene(inputfile, frame)
         mode = self.scene.device.mode
         self.title = f"GIXStapose ({mode} mode)"
 
         self.d = Diffractometer()
-        self.d.load_compound(compound)
+        _, _, _, positions, _, _, box = info
+        self.d.load(positions, box[:3])
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -121,7 +120,8 @@ class ApplicationWindow(QMainWindow):
         botlayout.addWidget(self.button111, 0, 3, 2, 1)
 
         # Connect buttons to moving the camera
-        # thanks to this wonderful answer https://stackoverflow.com/a/57167056/11969403
+        # thanks to this wonderful answer
+        # https://stackoverflow.com/a/57167056/11969403
         self.button100.clicked.connect(lambda: self.move_camera((1,0,0)))
         self.button110.clicked.connect(lambda: self.move_camera((1,1,0)))
         self.button111.clicked.connect(lambda: self.move_camera((1,1,1)))
@@ -150,7 +150,9 @@ class ApplicationWindow(QMainWindow):
     def processtrigger(self, q):
         if q.text() == "Render Scene":
             print("Rendering...")
-            output = fresnel.pathtrace(self.view.scene, light_samples=40, w=600, h=600)
+            output = fresnel.pathtrace(
+                self.view.scene, light_samples=40, w=600, h=600
+            )
             filename = f"{self.basename}_scene{self.render_counter}.png"
 
             image = PIL.Image.fromarray(output[:], mode='RGBA')
@@ -177,9 +179,7 @@ class ApplicationWindow(QMainWindow):
         self.plot_diffract(self.view.scene.camera)
 
     def camera_text(self, camera):
-        """
-        Convert a fresnel.Camera object to a readable string
-        """
+        """Convert a fresnel.Camera object to a readable string."""
         pos = camera.position
         look = camera.look_at
         up = camera.up
@@ -218,20 +218,28 @@ class ApplicationWindow(QMainWindow):
 
 def camera_from_pos(pos):
     camera = fresnel.camera.Orthographic(
-            position=pos,
-            look_at=(0,0,0),
-            up=(0,0,1),
-            height=1.5
-            )
+        position=pos, look_at=(0,0,0), up=(0,0,1), height=1.5
+    )
 
     return camera
 
 def main():
-    parser = argparse.ArgumentParser(description="Provide a chemical input file")
-    parser.add_argument("-i", "--input", type=str,
-        help="an input file, accepted types: mol2, pdb, xyz, gsd")
-    parser.add_argument("-t", "--frame", type=int, default="-1",
-        help="if trajectory file is given, which frame to diffract (default -1 or last frame)")
+    parser = argparse.ArgumentParser(
+        description="Provide a chemical input file"
+    )
+    parser.add_argument(
+        "-i",
+        "--input",
+        type=str,
+        help="an input file, accepted types: mol2, pdb, xyz, gsd"
+    )
+    parser.add_argument(
+        "-t",
+        "--frame",
+        type=int,
+        default="-1",
+        help="if trajectory file is given, which frame to diffract"
+    )
     args = parser.parse_args()
 
     qapp = QApplication.instance()

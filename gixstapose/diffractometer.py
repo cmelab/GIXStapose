@@ -40,8 +40,8 @@ class Diffractometer:
         self.top = top
 
     def load(self, xyz, L):
-        """
-        Loads the particle positions and box dimensions for diffraction.
+        """Load the particle positions and box dimensions for diffraction.
+
         Note: only supports orthorhombic boxes
 
         Parameters
@@ -58,24 +58,6 @@ class Diffractometer:
                 )
         self.orig = np.copy(xyz)
         self.orig, self.image = shift_pbc(xyz, np.array([L[0], L[1], L[2]]))
-
-    def load_compound(self, compound):
-        """
-        Loads the particle positions and box dimensions for diffraction
-        from an mbuild.Compound.
-        Note: only supports orthorhombic boxes
-
-        Parameters
-        ----------
-        compound : mbuild.Compound,
-                   compound with box and positions to load if compound.box
-                   does not exist, compound.bounding_box is used.
-        """
-        try:
-            box = compound.box.lengths
-        except AttributeError:
-            box = compound.boundingbox.lengths
-        self.load(compound.xyz, box)
 
     def pbc_2d(self, xy, N):
         """
