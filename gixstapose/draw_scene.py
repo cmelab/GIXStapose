@@ -93,7 +93,7 @@ def create_scene(info, color="cpk", scale=1.0, show_bonds=False):
         # if there are more unique particle names than colors,
         # colors will be reused
         for i, n in enumerate(typeids):
-            color_array[i, :] = bsu_colors[types.index(n) % len(bsu_colors)]
+            color_array[i, :] = bsu_colors[n % len(bsu_colors)]
     else:
         # Populate the color_array with colors based on particle name
         # choose colors evenly distributed through a matplotlib colormap
