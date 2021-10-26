@@ -6,6 +6,7 @@ import numpy as np
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage.interpolation import affine_transform
 from scipy.ndimage.fourier import fourier_gaussian
+from scipy.ndimage import rotate
 
 
 class Diffractometer:
@@ -240,8 +241,7 @@ class Diffractometer:
 
 
     def diffract_from_camera(self, camera):
-        """
-        2D FFT to get diffraction pattern from intensity matrix.
+        """2D FFT to get diffraction pattern from intensity matrix.
 
         Parameters
         ----------
@@ -255,7 +255,14 @@ class Diffractometer:
             diffraction pattern
         """
         rot = camera_to_rot(camera)
-        return self.diffract(rot.T)
+        up_ang = self.ang_up(camera.up)
+        dp = self.diffract(rot.T)
+        return rotate(dp, up_ang, reshape=False, cval=np.log10(self.bot), order=1)
+
+    def ang_up(self, new_up):
+        """Calculate angle of rotation from [0,1,0]
+        """
+        return np.rad2deg(get_angle([0,1,0], new_up))
 
 
     def diffract(self, rot, cutout=True):
