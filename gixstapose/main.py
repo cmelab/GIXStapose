@@ -119,20 +119,30 @@ class ApplicationWindow(QMainWindow): # pragma: no cover
         self.button111.setMaximumSize(QSize(100,40))
         botlayout.addWidget(self.button111, 0, 3, 2, 1)
 
+        self.button_zplus = QPushButton(u"rotate +5\N{DEGREE SIGN}")
+        self.button_zplus.setMaximumSize(QSize(100,40))
+        botlayout.addWidget(self.button_zplus, 0, 4, 2, 1)
+
+        self.button_zminus = QPushButton("rotate -5\N{DEGREE SIGN}")
+        self.button_zminus.setMaximumSize(QSize(100,40))
+        botlayout.addWidget(self.button_zminus, 0, 5, 2, 1)
+
         # Connect buttons to moving the camera
         # thanks to this wonderful answer
         # https://stackoverflow.com/a/57167056/11969403
         self.button100.clicked.connect(lambda: self.move_camera((1,0,0)))
         self.button110.clicked.connect(lambda: self.move_camera((1,1,0)))
         self.button111.clicked.connect(lambda: self.move_camera((1,1,1)))
+        self.button_zplus.clicked.connect(lambda: self.rotate_camera(5))
+        self.button_zminus.clicked.connect(lambda: self.rotate_camera(-5))
 
         # Add space between buttons and slider
-        botlayout.setColumnMinimumWidth(4,350)
+        botlayout.setColumnMinimumWidth(6, 150)
 
         # Zoom slider
         zlabel = QLabel("Zoom")
         zlabel.setAlignment(Qt.AlignCenter)
-        botlayout.addWidget(zlabel, 0, 5)
+        botlayout.addWidget(zlabel, 0, 7)
 
         self.zooms = [i for i in range(1, self.d.N) if self.d.N % i == 0]
         self.zoomslider = QSlider(Qt.Horizontal)
@@ -141,9 +151,9 @@ class ApplicationWindow(QMainWindow): # pragma: no cover
         self.zoomslider.setValue(self.zooms.index(self.d.zoom))
         self.zoomslider.valueChanged.connect(self.change_zoom)
         self.zoomslider.setMaximumSize(QSize(600,30))
-        botlayout.addWidget(self.zoomslider, 1, 5)
+        botlayout.addWidget(self.zoomslider, 1, 7)
 
-        botlayout.setColumnMinimumWidth(6,50)
+        botlayout.setColumnMinimumWidth(8,50)
 
         self.bothorizontalGroupBox.setLayout(botlayout)
 
@@ -206,12 +216,27 @@ class ApplicationWindow(QMainWindow): # pragma: no cover
 
         # diffraction pattern
         self.dp = self.d.diffract_from_camera(camera)
+
         self.diffract_ax.imshow(self.dp, cmap="jet")
         self.diffract_ax.figure.canvas.draw()
         self.repaint()
 
     def move_camera(self, pos):
         self.view.scene.camera = camera_from_pos(pos)
+        #self.repaint()
+        self.view._start_rendering()
+        self.view.update()
+
+    def rotate_camera(self, angle_deg):
+        angle_rad = np.deg2rad(-angle_deg)
+
+        r_mat = np.array(
+            [[np.cos(angle_rad), -np.sin(angle_rad), 0],
+             [np.sin(angle_rad), np.cos(angle_rad), 0],
+             [0, 0, 1]]
+        )
+
+        self.view.scene.camera.up = self.view.scene.camera.up.dot(r_mat)
         #self.repaint()
         self.view._start_rendering()
         self.view.update()
