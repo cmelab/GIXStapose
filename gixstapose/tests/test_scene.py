@@ -1,6 +1,7 @@
 import os
 
 import fresnel
+import pytest
 
 from gixstapose.draw_scene import get_scene
 
@@ -36,5 +37,5 @@ def test_scene_colors():
     scene, info = get_scene(methanegsd, color="jet")
     assert type(scene) is type(fresnel.Scene())
 
-    scene, info = get_scene(methanegsd, color="heck")
-    assert type(scene) is type(fresnel.Scene())
+    with pytest.raises(ValueError):
+        get_scene(methanegsd, color="heck")
