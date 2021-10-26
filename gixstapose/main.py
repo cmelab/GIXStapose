@@ -20,7 +20,7 @@ from gixstapose.diffractometer import Diffractometer
 from gixstapose.draw_scene import get_scene
 
 
-class ApplicationWindow(QMainWindow):
+class ApplicationWindow(QMainWindow): # pragma: no cover
     def __init__(self, inputfile, frame):
         super().__init__()
 
@@ -223,7 +223,7 @@ def camera_from_pos(pos):
 
     return camera
 
-def main():
+def main(): # pragma: no cover
     parser = argparse.ArgumentParser(
         description="Provide a chemical input file"
     )
