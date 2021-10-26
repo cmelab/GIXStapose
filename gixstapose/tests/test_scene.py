@@ -14,7 +14,27 @@ def test_scene_gsd():
     scene, info = get_scene(methanegsd)
     assert type(scene) is type(fresnel.Scene())
 
+    scene, info = get_scene(methanegsd, show_bonds=True)
+    assert type(scene) is type(fresnel.Scene())
+
 def test_scene_comp():
     methanemol2 = os.path.join(data_dir, "methane.mol2")
     scene, info = get_scene(methanemol2)
+    assert type(scene) is type(fresnel.Scene())
+
+    scene, info = get_scene(methanemol2, show_bonds=True)
+    assert type(scene) is type(fresnel.Scene())
+
+def test_scene_colors():
+    methanegsd = os.path.join(data_dir, "methane.gsd")
+    scene, info = get_scene(methanegsd, color="bsu")
+    assert type(scene) is type(fresnel.Scene())
+
+    scene, info = get_scene(methanegsd, color={"C": "grey"})
+    assert type(scene) is type(fresnel.Scene())
+
+    scene, info = get_scene(methanegsd, color="jet")
+    assert type(scene) is type(fresnel.Scene())
+
+    scene, info = get_scene(methanegsd, color="heck")
     assert type(scene) is type(fresnel.Scene())
