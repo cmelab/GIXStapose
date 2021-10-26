@@ -143,23 +143,23 @@ def create_scene(info, color="cpk", scale=1.0, show_bonds=False):
 
     # bonds
     if N_bonds > 0 and show_bonds:
-        bonds = fresnel.geometry.Cylinder(scene, N=N_bonds)
-        bonds.material = fresnel.material.Material(roughness=0.5)
-        bonds.outline_width = 0.01 * scale
+        bond_cyls = fresnel.geometry.Cylinder(scene, N=N_bonds)
+        bond_cyls.material = fresnel.material.Material(roughness=0.5)
+        bond_cyls.outline_width = 0.01 * scale
 
         # bonds are white
         bond_colors = np.ones((N_bonds, 3), dtype="float64")
 
-        bonds.material.primitive_color_mix = 1.0
-        bonds.points[:] = bonds
+        bond_cyls.material.primitive_color_mix = 1.0
+        bond_cyls.points[:] = bonds
 
-        bonds.color[:] = np.stack(
+        bond_cyls.color[:] = np.stack(
             [
                 fresnel.color.linear(bond_colors),
                 fresnel.color.linear(bond_colors)
             ], axis=1
         )
-        bonds.radius[:] = [0.03 * scale] * N_bonds
+        bond_cyls.radius[:] = [0.03 * scale] * N_bonds
 
     # Create box in fresnel
     fresnel.geometry.Box(scene, box, box_radius=0.008 * scale)
