@@ -228,7 +228,7 @@ class ApplicationWindow(QMainWindow): # pragma: no cover
         self.view.update()
 
     def rotate_camera(self, angle_deg):
-        angle_rad = np.deg2rad(-angle_deg)
+        angle_rad = np.deg2rad(angle_deg)
 
         r_mat = np.array(
             [[np.cos(angle_rad), -np.sin(angle_rad), 0],
