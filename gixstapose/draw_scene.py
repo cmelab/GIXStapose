@@ -12,7 +12,9 @@ import PIL
 from gixstapose.color_dicts import cpk_colors, bsu_colors, radii_dict
 
 
-def get_scene(inputfile, frame=-1, color="cpk", scale=1.0, show_bonds=False):
+def get_scene(
+    inputfile, frame=-1, color="cpk", scale=1.0, show_bonds=False, scene=None
+):
     """Loads an input file into a fresnel.Scene.
 
     Parameters
@@ -29,6 +31,8 @@ def get_scene(inputfile, frame=-1, color="cpk", scale=1.0, show_bonds=False):
         Scaling factor for the particle radii, bond and box lengths
     show_bonds : bool, default False
         Whether to show bonds
+    scene : fresnel.Scene, default None
+        Existing scene to add to. If None is provided, a new scene is created.
 
     Returns
     -------
@@ -36,10 +40,10 @@ def get_scene(inputfile, frame=-1, color="cpk", scale=1.0, show_bonds=False):
     """
     info = get_info(inputfile, frame, show_bonds)
 
-    return create_scene(info, color, scale, show_bonds), info
+    return create_scene(info, color, scale, show_bonds, scene), info
 
 
-def create_scene(info, color="cpk", scale=1.0, show_bonds=False):
+def create_scene(info, color="cpk", scale=1.0, show_bonds=False, scene=None):
     """Create a fresnel.Scene object.
 
     Adds geometries for particles, bonds, and box (or boundingbox).
@@ -55,6 +59,8 @@ def create_scene(info, color="cpk", scale=1.0, show_bonds=False):
         Scaling factor for the particle radii, bond and box lengths
     show_bonds : bool, default False
         Whether to show bonds
+    scene : fresnel.Scene, default None
+        Existing scene to add to. If None is provided, a new scene is created.
 
     Returns
     -------
@@ -126,7 +132,8 @@ def create_scene(info, color="cpk", scale=1.0, show_bonds=False):
             rad_array[i] = radii_dict["default"] * scale
 
     ## Start building the fresnel scene
-    scene = fresnel.Scene()
+    if scene is None:
+        scene = fresnel.Scene()
 
     # Spheres for every particle in the system
     geometry = fresnel.geometry.Sphere(scene, N=N)
