@@ -43,7 +43,9 @@ def get_scene(
     return create_scene(info, color, scale, show_bonds, scene), info
 
 
-def create_scene(info, color="cpk", scale=1.0, show_bonds=False, scene=None):
+def create_scene(
+    info, color="cpk", scale=1.0, show_bonds=False, init_scene=None
+):
     """Create a fresnel.Scene object.
 
     Adds geometries for particles, bonds, and box (or boundingbox).
@@ -59,7 +61,7 @@ def create_scene(info, color="cpk", scale=1.0, show_bonds=False, scene=None):
         Scaling factor for the particle radii, bond and box lengths
     show_bonds : bool, default False
         Whether to show bonds
-    scene : fresnel.Scene, default None
+    init_scene : fresnel.Scene, default None
         Existing scene to add to. If None is provided, a new scene is created.
 
     Returns
@@ -132,8 +134,10 @@ def create_scene(info, color="cpk", scale=1.0, show_bonds=False, scene=None):
             rad_array[i] = radii_dict["default"] * scale
 
     ## Start building the fresnel scene
-    if scene is None:
+    if init_scene is None:
         scene = fresnel.Scene()
+    else:
+        scene = init_scene
 
     # Spheres for every particle in the system
     geometry = fresnel.geometry.Sphere(scene, N=N)
@@ -168,13 +172,14 @@ def create_scene(info, color="cpk", scale=1.0, show_bonds=False, scene=None):
         )
         bond_cyls.radius[:] = [0.03 * scale] * N_bonds
 
-    # Create box in fresnel
-    fresnel.geometry.Box(scene, box, box_radius=0.008 * scale)
+    if init_scene is None:
+        # Create box in fresnel
+        fresnel.geometry.Box(scene, box, box_radius=0.008 * scale)
 
-    # Set the initial camera position
-    max_dist = np.max(positions) - np.min(positions)
-    scene.camera.height = 1.5 * max_dist
-    scene.camera.position = [max_dist, max_dist, max_dist]
+        # Set the initial camera position
+        max_dist = np.max(positions) - np.min(positions)
+        scene.camera.height = 1.5 * max_dist
+        scene.camera.position = [max_dist, max_dist, max_dist]
     return scene
 
 
