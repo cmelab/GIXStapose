@@ -1,21 +1,22 @@
+"""Scene drawing module for GIXStapose."""
 import os
 import random
 
 import fresnel
 import gsd.hoomd
 import matplotlib.cm
-from matplotlib import colors as mplcolors
 import mbuild as mb
 import numpy as np
 import PIL
+from matplotlib import colors as mplcolors
 
-from gixstapose.color_dicts import cpk_colors, bsu_colors, radii_dict
+from gixstapose.color_dicts import bsu_colors, cpk_colors, radii_dict
 
 
 def get_scene(
     inputfile, frame=-1, color="cpk", scale=1.0, show_bonds=False, scene=None
 ):
-    """Loads an input file into a fresnel.Scene.
+    """Load an input file into a fresnel.Scene.
 
     Parameters
     ----------
@@ -68,7 +69,6 @@ def create_scene(
     -------
     fresnel.Scene
     """
-
     N, types, typeids, positions, N_bonds, bonds, box = info
 
     color_array = np.empty((N, 3), dtype="float64")
@@ -167,8 +167,9 @@ def create_scene(
         bond_cyls.color[:] = np.stack(
             [
                 fresnel.color.linear(bond_colors),
-                fresnel.color.linear(bond_colors)
-            ], axis=1
+                fresnel.color.linear(bond_colors),
+            ],
+            axis=1,
         )
         bond_cyls.radius[:] = [0.03 * scale] * N_bonds
 
@@ -184,6 +185,30 @@ def create_scene(
 
 
 def get_comp_info(comp, show_bonds):
+    """Get info from mbuild compounds.
+
+    `info` is [N, types, typeids, positions, N_bonds, bonds, box]
+
+    Parameters
+    ----------
+    comp: mbuild.Compound
+        Compound to get info from.
+    show_bonds: bool
+        Whether to show the bonds in the scene.
+
+    Returns
+    -------
+    [
+        int,
+        list of str,
+        array of int (N,),
+        array of float (N,3),
+        int,
+        array of int (N,2),
+        array of float (6,)
+    ]
+        [N, types, typeids, positions, N_bonds, bonds, box]
+    """
     N = comp.n_particles
     names = [p.name for p in comp.particles()]
     types = list(set(names))
@@ -193,9 +218,7 @@ def get_comp_info(comp, show_bonds):
     N_bonds = comp.n_bonds
     if N_bonds > 0 and show_bonds:
         # bonds.shape is (nbond, 2 ends, xyz)
-        bonds = np.stack(
-            [np.stack((i[0].pos, i[1].pos)) for i in comp.bonds()]
-        )
+        bonds = np.stack([np.stack((i[0].pos, i[1].pos)) for i in comp.bonds()])
     else:
         bonds = None
 
@@ -210,6 +233,32 @@ def get_comp_info(comp, show_bonds):
 
 
 def get_gsd_info(gsdfile, frame, show_bonds):
+    """Get info from gsd file.
+
+    `info` is [N, types, typeids, positions, N_bonds, bonds, box]
+
+    Parameters
+    ----------
+    gsdfile: path
+        Path to gsd file to get info from.
+    frame: int
+        Frame to get info from.
+    show_bonds: bool
+        Whether to show the bonds in the scene.
+
+    Returns
+    -------
+    [
+        int,
+        list of str,
+        array of int (N,),
+        array of float (N,3),
+        int,
+        array of int (N,2),
+        array of float (6,)
+    ]
+        [N, types, typeids, positions, N_bonds, bonds, box]
+    """
     with gsd.hoomd.open(gsdfile) as f:
         snap = f[frame]
 
@@ -222,7 +271,7 @@ def get_gsd_info(gsdfile, frame, show_bonds):
     if N_bonds > 0 and show_bonds:
         # bonds.shape is (nbond, 2 ends, xyz)
         bonds = np.stack(
-            [(positions[i],positions[j]) for (i,j) in snap.bonds.group]
+            [(positions[i], positions[j]) for (i, j) in snap.bonds.group]
         )
     else:
         bonds = None
@@ -232,6 +281,32 @@ def get_gsd_info(gsdfile, frame, show_bonds):
 
 
 def get_info(inputfile, frame=-1, show_bonds=False):
+    """Get info from inputfile.
+
+    `info` is [N, types, typeids, positions, N_bonds, bonds, box]
+
+    Parameters
+    ----------
+    inputfile: path
+        Path to file to get info from.
+    frame: int
+        If trajectory, frame to get info from.
+    show_bonds: bool
+        Whether to show the bonds in the scene.
+
+    Returns
+    -------
+    [
+        int,
+        list of str,
+        array of int (N,),
+        array of float (N,3),
+        int,
+        array of int (N,2),
+        array of float (6,)
+    ]
+        [N, types, typeids, positions, N_bonds, bonds, box]
+    """
     name, extension = os.path.splitext(inputfile)
     if extension == ".gsd":
         # info contains N, types, typeids, positions, N_bonds, bonds, box
