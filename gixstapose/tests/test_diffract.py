@@ -26,3 +26,4 @@ def test_diffract():
     im = Image.open(path + "/data/sc10_camera100.png")
     imarr = np.asarray(im)
     assert np.allclose(dparr, imarr)
+    d.plot()
