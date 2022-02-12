@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import numpy as np
+import pytest
 from PIL import Image
 
 from gixstapose.diffractometer import camera_to_rot
@@ -12,7 +14,7 @@ data_dir = str(Path(__file__).parent.parent.resolve()) + "/data/"
 class BaseTest:
     @pytest.fixture
     def sc10(self):
-        return data_dir + "/data/sc10.pdb"
+        return data_dir + "sc10.pdb"
 
     @pytest.fixture
     def positions_and_box(self, sc10):

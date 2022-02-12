@@ -4,10 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from base_test import BaseTest
+from PIL import Image
 
-from gixstapose.diffractometer import Diffractometer, camera_to_rot
-from gixstapose.draw_scene import get_info
-from gixstapose.main import camera_from_pos
+from gixstapose.diffractometer import Diffractometer
 
 
 class Test_Diffractometer(BaseTest):
