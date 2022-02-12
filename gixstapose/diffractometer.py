@@ -6,6 +6,7 @@ from os import makedirs
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
+from scipy.ndimage import rotate
 from scipy.ndimage.fourier import fourier_gaussian
 from scipy.ndimage.interpolation import affine_transform
 
@@ -47,6 +48,10 @@ class Diffractometer:
         self.length_scale = length_scale
         self.bot = bot
         self.top = top
+        self.dp = None
+        self.box = None
+        self.orig = None
+        self.up_ang = None
 
     def load(self, xyz, L):
         """Load the particle positions and box dimensions for diffraction.
@@ -245,6 +250,7 @@ class Diffractometer:
             Diffraction pattern
         """
         rot = camera_to_rot(camera)
+        self.up_ang = np.rad2deg(get_angle([0, 1, 0], camera.up)) - 90
         return self.diffract(rot.T)
 
     def diffract(self, rot, cutout=True):
@@ -284,11 +290,57 @@ class Diffractometer:
         dp[dp > self.top] = self.top
         dp = np.log10(dp)
         if not cutout:
+            self.dp = dp
             return dp
 
         idbig = self.circle_cutout(dp)
         dp[np.unravel_index(idbig, (self.N, self.N))] = np.log10(self.bot)
+        self.dp = dp
         return dp
+
+    def plot(self):
+        """Plot the diffraction pattern.
+
+        The plot will have units in inverse Angstrom calculated from the
+        `length_scale` attribute.
+        This function will also rotate the diffraction pattern according to the
+        `up` attribute of the camera if `diffract_from_camera` was used.
+        """
+        if self.orig is None or self.box is None:
+            raise ValueError(
+                """Please use Diffractometer.load() followed by
+            Diffractometer.diffract() or Diffractometer.diffract_from_camera()
+            before calling this function."""
+            )
+        if self.dp is None:
+            raise ValueError(
+                """Please use Diffractometer.diffract() or
+            Diffractometer.diffract_from_camera() before calling this function.
+            """
+            )
+        fig, ax = plt.subplots(figsize=(8, 8))
+        extent = (self.N / 2 / self.zoom + 1) / (
+            max(self.box) * self.length_scale
+        )
+        dp = self.dp
+        if self.up_ang is not None:
+            dp = rotate(
+                self.dp,
+                self.up_ang,
+                reshape=False,
+                cval=np.log10(self.bot),
+                order=1,
+            )
+        ax.imshow(dp, extent=[-extent, extent, -extent, extent])
+        ax.set_xlabel(r"$q_{xx} (1/\AA)$")
+        ax.set_ylabel(r"$q_{yy} (1/\AA)$")
+        ticks = np.arange(
+            -round(extent, 2),
+            round(extent, 2) + round(extent / 2, 2),
+            round(extent / 2, 2),
+        )
+        ax.set_xticks(ticks)
+        ax.set_yticks(ticks)
 
 
 def vector_projection(u, v):
