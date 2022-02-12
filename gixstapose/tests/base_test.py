@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import numpy as np
@@ -14,7 +15,7 @@ data_dir = str(Path(__file__).parent.parent.resolve()) + "/data/"
 class BaseTest:
     @pytest.fixture
     def sc10(self):
-        return data_dir + "sc10.pdb"
+        return os.path.join(data_dir, "sc10.pdb")
 
     @pytest.fixture
     def positions_and_box(self, sc10):
@@ -31,5 +32,13 @@ class BaseTest:
 
     @pytest.fixture
     def imarray100(self):
-        im = Image.open(data_dir + "sc10_camera100.png")
+        im = Image.open(os.path.join(data_dir, "sc10_camera100.png"))
         return np.asarray(im)
+
+    @pytest.fixture
+    def methanegsd(self):
+        return os.path.join(data_dir, "methane.gsd")
+
+    @pytest.fixture
+    def methanemol2(self):
+        return os.path.join(data_dir, "methane.mol2")
