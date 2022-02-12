@@ -1,6 +1,7 @@
 [![build](https://github.com/cmelab/GIXStapose/actions/workflows/build.yml/badge.svg)](https://github.com/cmelab/GIXStapose/actions/workflows/build.yml)
 [![pytest](https://github.com/cmelab/GIXStapose/actions/workflows/pytest.yml/badge.svg)](https://github.com/cmelab/GIXStapose/actions/workflows/pytest.yml)
 [![codecov](https://codecov.io/gh/cmelab/GIXStapose/branch/master/graph/badge.svg)](https://codecov.io/gh/cmelab/GIXStapose)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/cmelab/GIXStapose/master.svg)](https://results.pre-commit.ci/latest/github/cmelab/GIXStapose/master)
 
 
 # GIXStapose
