@@ -305,6 +305,10 @@ class Diffractometer:
         `length_scale` attribute.
         This function will also rotate the diffraction pattern according to the
         `up` attribute of the camera if `diffract_from_camera` was used.
+
+        Returns
+        -------
+        matplotlib.figure.Figure, matplotlib.axes._subplots.AxesSubplot
         """
         if self.orig is None or self.box is None:
             raise ValueError(
@@ -341,6 +345,7 @@ class Diffractometer:
         )
         ax.set_xticks(ticks)
         ax.set_yticks(ticks)
+        return fig, ax
 
 
 def vector_projection(u, v):
