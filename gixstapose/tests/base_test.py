@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from PIL import Image
+
 from gixstapose.diffractometer import camera_to_rot
 from gixstapose.draw_scene import get_info
 from gixstapose.main import camera_from_pos
@@ -24,3 +26,8 @@ class BaseTest:
     @pytest.fixture
     def rot100(self, camera100):
         return camera_to_rot(camera100).T
+
+    @pytest.fixture
+    def imarray100(self):
+        im = Image.open(data_dir + "sc10_camera100.png")
+        return np.asarray(im)
