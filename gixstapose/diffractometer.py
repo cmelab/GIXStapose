@@ -21,9 +21,10 @@ class Diffractometer:
         Must be a factor of the grid size
     peak_width: int, default 1
         The sigma value passed to `fourier_gaussian` is `peak_width`/`zoom`
-    length_scale: float, default 3.905
+    length_scale: float, default 3.56359487
         If the input box and positions are in reduced units, `length_scale` is
-        the conversion factor to go from sigma to Angstroms.
+        the conversion factor in Angstroms/sigma.
+        (3.56359487 Angstroms/sigma is the sulfur sigma value in GAFF.)
     bot: float, default 4e-6
         Smallest allowed intensity value in the diffraction pattern.
     top: float, default 0.7
@@ -35,7 +36,7 @@ class Diffractometer:
         grid_size=512,
         zoom=4,
         peak_width=1,
-        length_scale=3.905,
+        length_scale=3.56359487,
         bot=4e-6,
         top=0.7,
     ):
