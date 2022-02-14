@@ -338,11 +338,13 @@ class Diffractometer:
         ax.imshow(dp, extent=[-extent, extent, -extent, extent])
         ax.set_xlabel(r"$q_{xx} (1/\AA)$")
         ax.set_ylabel(r"$q_{yy} (1/\AA)$")
-        ticks = np.arange(
+        ticks = ticks = [
             -round(extent, 2),
-            round(extent, 2) + round(extent / 2, 2),
+            -round(extent / 2, 2),
+            0,
             round(extent / 2, 2),
-        )
+            round(extent, 2),
+        ]
         ax.set_xticks(ticks)
         ax.set_yticks(ticks)
         return fig, ax
