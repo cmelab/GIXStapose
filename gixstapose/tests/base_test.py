@@ -19,8 +19,8 @@ class BaseTest:
 
     @pytest.fixture
     def positions_and_box(self, sc10):
-        _, _, _, positions, _, _, box = get_info(sc10)
-        return positions, box[:3]
+        info = get_info(sc10)
+        return info["positions"], info["box"][:3]
 
     @pytest.fixture
     def camera100(self):
