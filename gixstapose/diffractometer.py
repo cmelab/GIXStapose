@@ -6,9 +6,7 @@ from os import makedirs
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
-from scipy.ndimage import rotate
-from scipy.ndimage.fourier import fourier_gaussian
-from scipy.ndimage.interpolation import affine_transform
+from scipy.ndimage import affine_transform, fourier_gaussian, rotate
 
 
 class Diffractometer:
