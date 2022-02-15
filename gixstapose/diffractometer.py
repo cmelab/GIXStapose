@@ -529,3 +529,69 @@ def rotation_matrix_from_to(a, b):
         + (1.0 - np.cos(theta)) * np.dot(A, A)
     )
     return R
+
+
+class PeakLabeller(object):
+    """Interactive widget to label peaks on a diffraction plot.
+
+    adapted from https://stackoverflow.com/a/19595292/11969403
+    """
+
+    def __init__(self, ax, pix_err=1):
+        self.canvas = ax.get_figure().canvas
+        self.cid = None
+        self.pt_lst = []
+        self.pt_plot = ax.plot(
+            [],
+            [],
+            marker="o",
+            color="red",
+            markersize=15,
+            fillstyle="none",
+            linestyle="none",
+            zorder=5,
+        )[0]
+        self.ax = ax
+        self.pix_err = pix_err
+        self.connect_sf()
+
+    def connect_sf(self):
+        """Connect the button press event."""
+        if self.cid is None:
+            self.cid = self.canvas.mpl_connect(
+                "button_press_event", self.click_event
+            )
+
+    def disconnect_sf(self):
+        """Disconnect the button press event."""
+        if self.cid is not None:
+            self.canvas.mpl_disconnect(self.cid)
+            self.cid = None
+
+    def click_event(self, event):
+        """Extract locations from the users click."""
+        if event.xdata is None or event.ydata is None:
+            return
+        if event.button == 1:
+            self.pt_lst.append((event.xdata, event.ydata))
+        self.redraw()
+
+    def redraw(self):
+        """Redraw the canvas."""
+        if len(self.pt_lst) > 0:
+            x, y = zip(*self.pt_lst)
+        else:
+            x, y = [], []
+        self.pt_plot.set_xdata(x)
+        self.pt_plot.set_ydata(y)
+
+        for xi, yi in zip(x, y):
+            label = f"{(xi**2 + yi**2)**0.5:.3f} 1/Å"
+            self.ax.annotate(
+                label,
+                (xi, yi),
+                color="red",
+                xytext=(0, 10),
+                textcoords="offset points",
+            )
+        self.canvas.draw()
