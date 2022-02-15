@@ -12,7 +12,5 @@ dependencies:
   - pillow>=8.3
   - pip>=21
   - py3Dmol>=1.7
-  - pytest
-  - pytest-cov
   - python=3.8
   - rowan>=1.3
