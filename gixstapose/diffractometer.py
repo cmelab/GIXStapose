@@ -334,8 +334,8 @@ class Diffractometer:
                 order=1,
             )
         ax.imshow(dp, extent=[-extent, extent, -extent, extent])
-        ax.set_xlabel(r"$q_{xx} (1/\AA)$")
-        ax.set_ylabel(r"$q_{yy} (1/\AA)$")
+        ax.set_xlabel(r"$q_{xx} (1/\AA)$", fontsize=20)
+        ax.set_ylabel(r"$q_{yy} (1/\AA)$", fontsize=20)
         ticks = ticks = [
             -round(extent, 2),
             -round(extent / 2, 2),
@@ -345,6 +345,7 @@ class Diffractometer:
         ]
         ax.set_xticks(ticks)
         ax.set_yticks(ticks)
+        ax.tick_params("both", labelsize=15)
         return fig, ax
 
 
@@ -593,5 +594,6 @@ class PeakLabeller(object):  # pragma: no cover
                 color="red",
                 xytext=(0, 10),
                 textcoords="offset points",
+                fontsize=20,
             )
         self.canvas.draw()
