@@ -346,6 +346,7 @@ class Diffractometer:
         ax.set_xticks(ticks)
         ax.set_yticks(ticks)
         ax.tick_params("both", labelsize=15)
+        fig.tight_layout()
         return fig, ax
 
 
