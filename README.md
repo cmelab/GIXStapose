@@ -35,6 +35,10 @@ cd GIXStapose
 conda env create -f environment.yml;
 conda activate gixstapose
 ```
+3. With the environment active, install this package
+```
+pip install .
+```
 
 ### Usage
 To run a simple cubic example:

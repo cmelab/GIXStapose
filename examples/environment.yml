@@ -1,0 +1,16 @@
+name: gixstapose-ex
+channels:
+  - conda-forge
+dependencies:
+  - fresnel>=0.13
+  - gsd>=2.4
+  - jupyter
+  - matplotlib>=3.4
+  - mbuild>=0.13
+  - numpy>=1.21
+  - openbabel=3.1.1
+  - pillow>=8.3
+  - pip>=21
+  - py3Dmol>=1.7
+  - python=3.8
+  - rowan>=1.3

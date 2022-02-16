@@ -56,8 +56,7 @@ class ApplicationWindow(QMainWindow):  # pragma: no cover
         self.title = f"GIXStapose ({mode} mode)"
 
         self.d = Diffractometer()
-        _, _, _, positions, _, _, box = info
-        self.d.load(positions, box[:3])
+        self.d.load(info["positions"], info["box"][:3])
 
     def initUI(self):
         """Initialize the user interface."""

@@ -6,8 +6,7 @@ from os import makedirs
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
-from scipy.ndimage.fourier import fourier_gaussian
-from scipy.ndimage.interpolation import affine_transform
+from scipy.ndimage import affine_transform, fourier_gaussian, rotate
 
 
 class Diffractometer:
@@ -21,9 +20,10 @@ class Diffractometer:
         Must be a factor of the grid size
     peak_width: int, default 1
         The sigma value passed to `fourier_gaussian` is `peak_width`/`zoom`
-    length_scale: float, default 3.905
+    length_scale: float, default 3.56359487
         If the input box and positions are in reduced units, `length_scale` is
-        the conversion factor to go from sigma to Angstroms.
+        the conversion factor in Angstroms/sigma.
+        (3.56359487 Angstroms/sigma is the sulfur sigma value in GAFF.)
     bot: float, default 4e-6
         Smallest allowed intensity value in the diffraction pattern.
     top: float, default 0.7
@@ -35,7 +35,7 @@ class Diffractometer:
         grid_size=512,
         zoom=4,
         peak_width=1,
-        length_scale=3.905,
+        length_scale=3.56359487,
         bot=4e-6,
         top=0.7,
     ):
@@ -46,6 +46,10 @@ class Diffractometer:
         self.length_scale = length_scale
         self.bot = bot
         self.top = top
+        self.dp = None
+        self.box = None
+        self.orig = None
+        self.up_ang = None
 
     def load(self, xyz, L):
         """Load the particle positions and box dimensions for diffraction.
@@ -244,6 +248,7 @@ class Diffractometer:
             Diffraction pattern
         """
         rot = camera_to_rot(camera)
+        self.up_ang = np.rad2deg(get_angle([0, 1, 0], camera.up)) - 90
         return self.diffract(rot.T)
 
     def diffract(self, rot, cutout=True):
@@ -283,11 +288,66 @@ class Diffractometer:
         dp[dp > self.top] = self.top
         dp = np.log10(dp)
         if not cutout:
+            self.dp = dp
             return dp
 
         idbig = self.circle_cutout(dp)
         dp[np.unravel_index(idbig, (self.N, self.N))] = np.log10(self.bot)
+        self.dp = dp
         return dp
+
+    def plot(self):
+        """Plot the diffraction pattern.
+
+        The plot will have units in inverse Angstrom calculated from the
+        `length_scale` attribute.
+        This function will also rotate the diffraction pattern according to the
+        `up` attribute of the camera if `diffract_from_camera` was used.
+
+        Returns
+        -------
+        matplotlib.figure.Figure, matplotlib.axes._subplots.AxesSubplot
+        """
+        if self.orig is None or self.box is None:
+            raise ValueError(
+                """Please use Diffractometer.load() followed by
+            Diffractometer.diffract() or Diffractometer.diffract_from_camera()
+            before calling this function."""
+            )
+        if self.dp is None:
+            raise ValueError(
+                """Please use Diffractometer.diffract() or
+            Diffractometer.diffract_from_camera() before calling this function.
+            """
+            )
+        fig, ax = plt.subplots(figsize=(8, 8))
+        extent = (self.N / 2 / self.zoom + 1) / (
+            np.max(self.box) * self.length_scale
+        )
+        dp = self.dp
+        if self.up_ang is not None:
+            dp = rotate(
+                self.dp,
+                self.up_ang,
+                reshape=False,
+                cval=np.log10(self.bot),
+                order=1,
+            )
+        ax.imshow(dp, extent=[-extent, extent, -extent, extent])
+        ax.set_xlabel(r"$q_{xx} (1/\AA)$", fontsize=20)
+        ax.set_ylabel(r"$q_{yy} (1/\AA)$", fontsize=20)
+        ticks = ticks = [
+            -round(extent, 2),
+            -round(extent / 2, 2),
+            0,
+            round(extent / 2, 2),
+            round(extent, 2),
+        ]
+        ax.set_xticks(ticks)
+        ax.set_yticks(ticks)
+        ax.tick_params("both", labelsize=15)
+        fig.tight_layout()
+        return fig, ax
 
 
 def vector_projection(u, v):
@@ -471,3 +531,70 @@ def rotation_matrix_from_to(a, b):
         + (1.0 - np.cos(theta)) * np.dot(A, A)
     )
     return R
+
+
+class PeakLabeller(object):  # pragma: no cover
+    """Interactive widget to label peaks on a diffraction plot.
+
+    adapted from https://stackoverflow.com/a/19595292/11969403
+    """
+
+    def __init__(self, ax, pix_err=1):
+        self.canvas = ax.get_figure().canvas
+        self.cid = None
+        self.pt_lst = []
+        self.pt_plot = ax.plot(
+            [],
+            [],
+            marker="o",
+            color="red",
+            markersize=15,
+            fillstyle="none",
+            linestyle="none",
+            zorder=5,
+        )[0]
+        self.ax = ax
+        self.pix_err = pix_err
+        self.connect_sf()
+
+    def connect_sf(self):
+        """Connect the button press event."""
+        if self.cid is None:
+            self.cid = self.canvas.mpl_connect(
+                "button_press_event", self.click_event
+            )
+
+    def disconnect_sf(self):
+        """Disconnect the button press event."""
+        if self.cid is not None:
+            self.canvas.mpl_disconnect(self.cid)
+            self.cid = None
+
+    def click_event(self, event):
+        """Extract locations from the users click."""
+        if event.xdata is None or event.ydata is None:
+            return
+        if event.button == 1:
+            self.pt_lst.append((event.xdata, event.ydata))
+        self.redraw()
+
+    def redraw(self):
+        """Redraw the canvas."""
+        if len(self.pt_lst) > 0:
+            x, y = zip(*self.pt_lst)
+        else:
+            x, y = [], []
+        self.pt_plot.set_xdata(x)
+        self.pt_plot.set_ydata(y)
+
+        for xi, yi in zip(x, y):
+            label = f"{(xi**2 + yi**2)**0.5:.3f} 1/Å"
+            self.ax.annotate(
+                label,
+                (xi, yi),
+                color="red",
+                xytext=(0, 10),
+                textcoords="offset points",
+                fontsize=20,
+            )
+        self.canvas.draw()
