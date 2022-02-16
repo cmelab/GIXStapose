@@ -531,7 +531,7 @@ def rotation_matrix_from_to(a, b):
     return R
 
 
-class PeakLabeller(object):
+class PeakLabeller(object):  # pragma: no cover
     """Interactive widget to label peaks on a diffraction plot.
 
     adapted from https://stackoverflow.com/a/19595292/11969403
