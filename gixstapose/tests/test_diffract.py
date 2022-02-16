@@ -1,27 +1,48 @@
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-from PIL import Image
+import tempfile
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
+from base_test import BaseTest
+from PIL import Image
 
-from gixstapose.draw_scene import get_info
-from gixstapose.diffractometer import Diffractometer, camera_to_rot
-from gixstapose.main import camera_from_pos
+from gixstapose.diffractometer import Diffractometer
 
-path = str(Path(__file__).parent.parent.resolve())
-temp = NamedTemporaryFile(suffix=".png")
 
-def test_diffract():
-    d = Diffractometer()
-    inputfile = path + "/data/sc10.pdb"
-    _, _, _, positions, _, _, box = get_info(inputfile)
-    d.load(positions, box[:3])
-    rot = camera_to_rot(camera_from_pos((1,0,0)))
-    dp = d.diffract(rot.T)
-    plt.imsave(temp.name, dp, cmap="jet")
-    dpim = Image.open(temp.name)
-    dparr = np.asarray(dpim)
-    im = Image.open(path + "/data/sc10_camera100.png")
-    imarr = np.asarray(im)
-    assert np.allclose(dparr,imarr)
+class Test_Diffractometer(BaseTest):
+    def test_diffract(self, positions_and_box, rot100, imarray100, tmp_path):
+        d_file = tmp_path / "dp.png"
+        d = Diffractometer()
+        d.load(*positions_and_box)
+        dp = d.diffract(rot100)
+        plt.imsave(d_file, dp, cmap="jet")
+        dpim = Image.open(d_file)
+        dparr = np.asarray(dpim)
+        assert np.allclose(dparr, imarray100)
+
+    def test_diffract_plot_camera(self, positions_and_box, camera100):
+        d = Diffractometer(length_scale=1.0)
+        d.load(*positions_and_box)
+        d.diffract_from_camera(camera100)
+        fig, ax = d.plot()
+        assert isinstance(ax, plt.Axes)
+        assert isinstance(fig, plt.Figure)
+        assert (-65, 65) == ax.get_xlim()
+
+    def test_diffract_plot_rot(self, positions_and_box, rot100):
+        d = Diffractometer(length_scale=2.0)
+        d.load(*positions_and_box)
+        d.diffract(rot100)
+        fig, ax = d.plot()
+        assert isinstance(ax, plt.Axes)
+        assert isinstance(fig, plt.Figure)
+        assert (-32.5, 32.5) == ax.get_xlim()
+
+    def test_diffract_plot_raises(self, positions_and_box):
+        with pytest.raises(ValueError):
+            d = Diffractometer()
+            d.plot()
+        with pytest.raises(ValueError):
+            d = Diffractometer()
+            d.load(*positions_and_box)
+            d.plot()

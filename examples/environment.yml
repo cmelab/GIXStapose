@@ -1,4 +1,4 @@
-name: gixstapose
+name: gixstapose-ex
 channels:
   - conda-forge
 dependencies:
@@ -11,10 +11,6 @@ dependencies:
   - openbabel=3.1.1
   - pillow>=8.3
   - pip>=21
-  - pre-commit
   - py3Dmol>=1.7
-  - pyside2>=5.13
-  - pytest
-  - pytest-cov
   - python=3.8
   - rowan>=1.3
