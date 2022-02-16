@@ -3,7 +3,7 @@ __pycache__/
 *.gsd
 *.txt
 *.png
-to_delete
+scratch
 
 # Compiled python modules.
 *.pyc
