@@ -21,20 +21,22 @@ class Test_Diffractometer(BaseTest):
         assert np.allclose(dparr, imarray100)
 
     def test_diffract_plot_camera(self, positions_and_box, camera100):
-        d = Diffractometer()
+        d = Diffractometer(length_scale=1.0)
         d.load(*positions_and_box)
         d.diffract_from_camera(camera100)
         fig, ax = d.plot()
         assert isinstance(ax, plt.Axes)
         assert isinstance(fig, plt.Figure)
+        assert (-65, 65) == ax.get_xlim()
 
     def test_diffract_plot_rot(self, positions_and_box, rot100):
-        d = Diffractometer()
+        d = Diffractometer(length_scale=2.0)
         d.load(*positions_and_box)
         d.diffract(rot100)
         fig, ax = d.plot()
         assert isinstance(ax, plt.Axes)
         assert isinstance(fig, plt.Figure)
+        assert (-32.5, 32.5) == ax.get_xlim()
 
     def test_diffract_plot_raises(self, positions_and_box):
         with pytest.raises(ValueError):
