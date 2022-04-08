@@ -334,8 +334,8 @@ class Diffractometer:
                 order=1,
             )
         ax.imshow(dp, extent=[-extent, extent, -extent, extent])
-        ax.set_xlabel(r"$q_{xx} (1/\AA)$", fontsize=20)
-        ax.set_ylabel(r"$q_{yy} (1/\AA)$", fontsize=20)
+        ax.set_xlabel(r"$q_{xy} (1/\AA)$", fontsize=20)
+        ax.set_ylabel(r"$q_{z} (1/\AA)$", fontsize=20)
         ticks = ticks = [
             -round(extent, 2),
             -round(extent / 2, 2),
