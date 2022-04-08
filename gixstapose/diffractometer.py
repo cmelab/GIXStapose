@@ -327,8 +327,10 @@ class Diffractometer:
             """
             )
         fig, ax = plt.subplots(figsize=(8, 8))
-        extent = (self.N / 2 / self.zoom + 1) / (
-            np.max(self.box) * self.length_scale
+        extent = (
+            (self.N / self.zoom + 1)
+            * np.pi
+            / (np.max(self.box) * self.length_scale)
         )
         dp = self.dp
         if self.up_ang is not None:
