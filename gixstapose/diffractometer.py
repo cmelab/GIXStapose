@@ -296,7 +296,7 @@ class Diffractometer:
         self.dp = dp
         return dp
 
-    def plot(self, cmap=None):
+    def plot(self, cmap=None, crop=None):
         """Plot the diffraction pattern.
 
         The plot will have units in inverse Angstrom calculated from the
@@ -309,6 +309,9 @@ class Diffractometer:
         cmap : str, default None
             Name of matplotlib colormap. If None is given, the default colormap
             for matplotlib.pyplot.imshow will be used.
+        crop : float, default None
+            For small systems where zoom does not give enough precision, crop
+            can be used to zoom the plot to (-crop, crop) in Angstroms.
 
         Returns
         -------
@@ -333,9 +336,22 @@ class Diffractometer:
             / (np.max(self.box) * self.length_scale)
         )
         dp = self.dp
+        if crop is not None:
+            pts = np.linspace(-extent, extent, self.N)
+            left_idx = np.searchsorted(pts, -crop)
+            right_idx = np.searchsorted(pts, crop)
+            new_dp = dp[left_idx:right_idx, left_idx:right_idx]
+            idbig = self.circle_cutout(new_dp)
+            new_dp[np.unravel_index(idbig, new_dp.shape)] = np.log10(self.bot)
+            dp = new_dp
+            extent = (
+                (new_dp.shape[0] / self.zoom + 1)
+                * np.pi
+                / (np.max(self.box) * self.length_scale)
+            )
         if self.up_ang is not None:
             dp = rotate(
-                self.dp,
+                dp,
                 self.up_ang,
                 reshape=False,
                 cval=np.log10(self.bot),
