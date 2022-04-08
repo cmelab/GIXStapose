@@ -296,13 +296,24 @@ class Diffractometer:
         self.dp = dp
         return dp
 
-    def plot(self):
+    def plot(self, cmap=None, crop=None, tickspacing=0.5):
         """Plot the diffraction pattern.
 
         The plot will have units in inverse Angstrom calculated from the
         `length_scale` attribute.
         This function will also rotate the diffraction pattern according to the
         `up` attribute of the camera if `diffract_from_camera` was used.
+
+        Parameters
+        ----------
+        cmap : str, default None
+            Name of matplotlib colormap. If None is given, the default colormap
+            for matplotlib.pyplot.imshow will be used.
+        crop : float, default None
+            For small systems where zoom does not give enough precision, crop
+            can be used to zoom the plot to (-crop, crop) in 1/Angstroms.
+        tickspacing : float, default 0.5
+            Spacing between x and x tick values in 1/Angstroms.
 
         Returns
         -------
@@ -321,27 +332,40 @@ class Diffractometer:
             """
             )
         fig, ax = plt.subplots(figsize=(8, 8))
-        extent = (self.N / 2 / self.zoom + 1) / (
-            np.max(self.box) * self.length_scale
+        extent = (
+            (self.N / self.zoom + 1)
+            * np.pi
+            / (np.max(self.box) * self.length_scale)
         )
         dp = self.dp
+        if crop is not None:
+            pts = np.linspace(-extent, extent, self.N)
+            left_idx = np.searchsorted(pts, -crop)
+            right_idx = np.searchsorted(pts, crop)
+            new_dp = dp[left_idx:right_idx, left_idx:right_idx]
+            idbig = self.circle_cutout(new_dp)
+            new_dp[np.unravel_index(idbig, new_dp.shape)] = np.log10(self.bot)
+            dp = new_dp
+            extent = (
+                (new_dp.shape[0] / self.zoom + 1)
+                * np.pi
+                / (np.max(self.box) * self.length_scale)
+            )
         if self.up_ang is not None:
             dp = rotate(
-                self.dp,
+                dp,
                 self.up_ang,
                 reshape=False,
                 cval=np.log10(self.bot),
                 order=1,
             )
-        ax.imshow(dp, extent=[-extent, extent, -extent, extent])
+        ax.imshow(dp, cmap=cmap, extent=[-extent, extent, -extent, extent])
         ax.set_xlabel(r"$q_{xy} (1/\AA)$", fontsize=20)
         ax.set_ylabel(r"$q_{z} (1/\AA)$", fontsize=20)
-        ticks = ticks = [
-            -round(extent, 2),
-            -round(extent / 2, 2),
-            0,
-            round(extent / 2, 2),
-            round(extent, 2),
+        maxtick = extent - (extent % tickspacing)
+        ticks = [
+            round(i, 1)
+            for i in np.arange(-maxtick, maxtick + tickspacing / 2, tickspacing)
         ]
         ax.set_xticks(ticks)
         ax.set_yticks(ticks)
