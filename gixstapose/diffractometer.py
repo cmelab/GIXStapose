@@ -296,7 +296,7 @@ class Diffractometer:
         self.dp = dp
         return dp
 
-    def plot(self, cmap=None, crop=None):
+    def plot(self, cmap=None, crop=None, tickspacing=0.5):
         """Plot the diffraction pattern.
 
         The plot will have units in inverse Angstrom calculated from the
@@ -311,7 +311,9 @@ class Diffractometer:
             for matplotlib.pyplot.imshow will be used.
         crop : float, default None
             For small systems where zoom does not give enough precision, crop
-            can be used to zoom the plot to (-crop, crop) in Angstroms.
+            can be used to zoom the plot to (-crop, crop) in 1/Angstroms.
+        tickspacing : float, default 0.5
+            Spacing between x and x tick values in 1/Angstroms.
 
         Returns
         -------
@@ -360,12 +362,10 @@ class Diffractometer:
         ax.imshow(dp, cmap=cmap, extent=[-extent, extent, -extent, extent])
         ax.set_xlabel(r"$q_{xy} (1/\AA)$", fontsize=20)
         ax.set_ylabel(r"$q_{z} (1/\AA)$", fontsize=20)
-        ticks = ticks = [
-            -round(extent, 2),
-            -round(extent / 2, 2),
-            0,
-            round(extent / 2, 2),
-            round(extent, 2),
+        maxtick = extent - (extent % tickspacing)
+        ticks = [
+            round(i, 1)
+            for i in np.arange(-maxtick, maxtick + tickspacing / 2, tickspacing)
         ]
         ax.set_xticks(ticks)
         ax.set_yticks(ticks)
