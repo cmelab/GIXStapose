@@ -296,13 +296,19 @@ class Diffractometer:
         self.dp = dp
         return dp
 
-    def plot(self):
+    def plot(self, cmap=None):
         """Plot the diffraction pattern.
 
         The plot will have units in inverse Angstrom calculated from the
         `length_scale` attribute.
         This function will also rotate the diffraction pattern according to the
         `up` attribute of the camera if `diffract_from_camera` was used.
+
+        Parameters
+        ----------
+        cmap : str, default None
+            Name of matplotlib colormap. If None is given, the default colormap
+            for matplotlib.pyplot.imshow will be used.
 
         Returns
         -------
@@ -333,7 +339,7 @@ class Diffractometer:
                 cval=np.log10(self.bot),
                 order=1,
             )
-        ax.imshow(dp, extent=[-extent, extent, -extent, extent])
+        ax.imshow(dp, cmap=cmap, extent=[-extent, extent, -extent, extent])
         ax.set_xlabel(r"$q_{xy} (1/\AA)$", fontsize=20)
         ax.set_ylabel(r"$q_{z} (1/\AA)$", fontsize=20)
         ticks = ticks = [
