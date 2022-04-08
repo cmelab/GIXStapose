@@ -27,7 +27,7 @@ class Test_Diffractometer(BaseTest):
         fig, ax = d.plot()
         assert isinstance(ax, plt.Axes)
         assert isinstance(fig, plt.Figure)
-        assert (-65, 65) == ax.get_xlim()
+        assert all(np.isclose(ax.get_xlim(), (-405, 405), atol=1))
 
     def test_diffract_plot_rot(self, positions_and_box, rot100):
         d = Diffractometer(length_scale=2.0)
@@ -36,7 +36,7 @@ class Test_Diffractometer(BaseTest):
         fig, ax = d.plot()
         assert isinstance(ax, plt.Axes)
         assert isinstance(fig, plt.Figure)
-        assert (-32.5, 32.5) == ax.get_xlim()
+        assert all(np.isclose(ax.get_xlim(), (-202, 202), atol=1))
 
     def test_diffract_plot_raises(self, positions_and_box):
         with pytest.raises(ValueError):
