@@ -1,4 +1,5 @@
 """Scene drawing module for GIXStapose."""
+
 import os
 import random
 
