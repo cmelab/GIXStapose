@@ -1,4 +1,5 @@
 """Diffractometer module of GIXStapose."""
+
 import os
 import time
 from os import makedirs
