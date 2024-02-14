@@ -33,7 +33,7 @@ from gixstapose.draw_scene import get_scene
 class ApplicationWindow(QMainWindow):  # pragma: no cover
     """Main class to hold all GIXStapose application."""
 
-    def __init__(self, inputfile, frame, atomtypes):
+    def __init__(self, inputfile, frame):
         super().__init__()
 
         self.title = "GIXStapose"
@@ -46,24 +46,18 @@ class ApplicationWindow(QMainWindow):  # pragma: no cover
         self.render_counter = 0
         self.diffract_counter = 0
 
-        self.init_diffractometer(inputfile, frame, atomtypes)
+        self.init_diffractometer(inputfile, frame)
 
         self.initUI()
 
-    def init_diffractometer(self, inputfile, frame, atomtypes):
+    def init_diffractometer(self, inputfile, frame):
         """Initialize the diffractometer."""
         self.scene, info = get_scene(inputfile, frame)
         mode = self.scene.device.mode
         self.title = f"GIXStapose ({mode} mode)"
 
         self.d = Diffractometer()
-        if atomtypes == 'all': 
-            x= info["positions"]
-        else:
-            Filter = info["typeids"] == info["types"].index(atomtypes)
-            x = info["positions"][Filter]
-        self.d.load(x, info["box"][:3]) #probably will need to change this 
-
+        self.d.load(info["positions"], info["box"][:3])
 
     def initUI(self):
         """Initialize the user interface."""
@@ -263,13 +257,6 @@ def main():  # pragma: no cover
         help="an input file, accepted types: mol2, pdb, xyz, gsd",
     )
     parser.add_argument(
-        "-T",
-        "--types",
-        type=str,
-        default="all",
-        help="atom types",
-    )
-    parser.add_argument(
         "-t",
         "--frame",
         type=int,
@@ -282,7 +269,7 @@ def main():  # pragma: no cover
     if qapp == None:
         qapp = QApplication([])
 
-    app = ApplicationWindow(args.input, args.frame, args.types)
+    app = ApplicationWindow(args.input, args.frame)
     app.show()
 
     qapp.exec_()
