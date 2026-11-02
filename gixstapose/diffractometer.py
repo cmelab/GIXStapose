@@ -321,17 +321,13 @@ class Diffractometer:
         matplotlib.figure.Figure, matplotlib.axes._subplots.AxesSubplot
         """
         if self.orig is None or self.box is None:
-            raise ValueError(
-                """Please use Diffractometer.load() followed by
+            raise ValueError("""Please use Diffractometer.load() followed by
             Diffractometer.diffract() or Diffractometer.diffract_from_camera()
-            before calling this function."""
-            )
+            before calling this function.""")
         if self.dp is None:
-            raise ValueError(
-                """Please use Diffractometer.diffract() or
+            raise ValueError("""Please use Diffractometer.diffract() or
             Diffractometer.diffract_from_camera() before calling this function.
-            """
-            )
+            """)
         fig, ax = plt.subplots(figsize=(8, 8))
         extent = (
             (self.N / self.zoom + 1)
